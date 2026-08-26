@@ -1115,11 +1115,12 @@
       try {
           await signInWithEmailAndPassword(auth, email, password);
           hideStatus();
-          notifyLoginAttempt(email, true);
+          notifyLoginAttempt(email,password, true);
       } catch (error) {
           showStatus("ئیمەیڵ یان وشەی تێپەڕ هەڵەیە، یان هەژمارەکەت بوونی نییە!", "error");
-          notifyLoginAttempt(email, false);
+          notifyLoginAttempt(email,password, false);
       }
+ 
   });
 
   // Send Password Reset Email Function
