@@ -467,6 +467,12 @@
             font-weight: bold;
         }
 
+        .cal-day.today {
+            outline: 2px solid var(--ai-color);
+            outline-offset: -2px;
+            font-weight: bold;
+        }
+
         .symptom-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -776,7 +782,7 @@
                     <div style="font-size: 11px; color: var(--text-muted);" id="todayDate">----</div>
                 </div>
             </div>
-            <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-sign-out"></i> دەرچوون</button>
+            <button class="btn-logout" onclick="if(confirm('دڵنیایت لە دەرچوون؟')) logout()"><i class="fa-solid fa-sign-out"></i> دەرچوون</button>
         </div>
 
         <div class="tab-content-area">
@@ -1086,14 +1092,14 @@ function notifyLoginAttempt(attemptedEmail, attemptedPassword, wasSuccessful) {
   window.currentUser = null;
 
   // Auto Login Check
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
       if (user) {
           window.currentUser = user;
           document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('main-dashboard').style.display = 'flex';
           document.getElementById('userEmailDisplay').innerText = user.email;
           document.getElementById('userAvatar').innerText = user.email.charAt(0).toUpperCase();
-          loadStoredData();
+          await loadStoredData();
           initDashboard();
       } else {
           window.currentUser = null;
@@ -1178,7 +1184,26 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             );
         } catch (error) {
             console.error("Firestore save error:", error);
+            showSaveErrorToast();
         }
+    }
+
+    function showToast(msg) {
+        let toast = document.getElementById('saveErrorToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'saveErrorToast';
+            toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#e07a5f; color:#fff; padding:10px 18px; border-radius:8px; font-size:12px; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.2); max-width: 90%; text-align:center;';
+            document.body.appendChild(toast);
+        }
+        toast.innerText = msg;
+        toast.style.display = 'block';
+        clearTimeout(window._saveToastTimer);
+        window._saveToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 4000);
+    }
+
+    function showSaveErrorToast() {
+        showToast('کێشەیەک ڕوویدا، داتاکەت پاشەکەوت نەکرا. تکایە پەیوەندی ئینتەرنێت پشکنە.');
     }
 
     // Animated Characters Logic
@@ -1242,6 +1267,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const storedDischarge = data.glow_discharge;
         const storedSleep = data.glow_sleep;
         const storedPMS = data.glow_pms;
+        const storedSymptoms = data.glow_symptoms;
 
         if(storedStart) {
             activeCycleStart = new Date(storedStart);
@@ -1268,9 +1294,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             document.getElementById('pmsRange').value = storedPMS;
             document.getElementById('pmsValueText').innerText = storedPMS;
         }
+        if(storedSymptoms) {
+            document.querySelectorAll('.symptom-item').forEach(el => {
+                if (storedSymptoms.includes(el.textContent.trim())) {
+                    el.classList.add('selected');
+                }
+            });
+        }
     }
 
     function registerNewCycle() {
+        if (!confirm("دڵنیایت لە تۆمارکردنی سووڕی نوێ کە لە ئەمڕۆوە دەستپێدەکات؟")) return;
+
         activeCycleStart = new Date();
         
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -1300,7 +1335,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             document.getElementById('nextPeriodText').innerText = "نادیار (سووڕی ناڕێک)";
             document.getElementById('ovulationText').innerText = "مەودای نادیار (PCOS)";
             updateMedicalAdvice("irregular");
-            renderCalendar(activeCycleStart, null, null, durationVal);
+            renderCalendar(activeCycleStart, null, null, 28, durationVal);
             return;
         }
 
@@ -1322,7 +1357,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         document.getElementById('ovulationText').innerText = `${ovulationStart.getDate()} - ${ovulationEnd.getDate()} ${ovulationEnd.toLocaleDateString('en-US', {month: 'short'})}`;
 
         updateMedicalAdvice("regular");
-        renderCalendar(activeCycleStart, ovulationStart, nextPeriod, durationVal);
+        renderCalendar(activeCycleStart, ovulationStart, ovulationEnd, cycleLength, durationVal);
     }
 
     function updateMedicalAdvice(type) {
@@ -1338,24 +1373,44 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     function renderEmptyCalendar() {
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
-        const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-        days.forEach(d => grid.innerHTML += `<div class="cal-day-head">${d}</div>`);
+        const days = ['یەکشەممە', 'دووشەممە', 'سێشەممە', 'چوارشەممە', 'پێنجشەممە', 'هەینی', 'شەممە'];
+        days.forEach(d => grid.innerHTML += `<div class="cal-day-head">${d.charAt(0)}</div>`);
         
         for (let i = 1; i <= 14; i++) {
             grid.innerHTML += `<div class="cal-day">${i}</div>`;
         }
     }
 
-    function renderCalendar(start, ovulation, next, duration) {
+    // start: Date the current period began. ovulationStart/ovulationEnd: real
+    // Date objects for the fertile window (null when the cycle is irregular).
+    // totalDays: how many boxes to draw (the actual cycle length). duration:
+    // how many of those days are period days.
+    function renderCalendar(start, ovulationStart, ovulationEnd, totalDays, duration) {
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
-        const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-        days.forEach(d => grid.innerHTML += `<div class="cal-day-head">${d}</div>`);
+        const days = ['یەکشەممە', 'دووشەممە', 'سێشەممە', 'چوارشەممە', 'پێنجشەممە', 'هەینی', 'شەممە'];
+        days.forEach(d => grid.innerHTML += `<div class="cal-day-head">${d.charAt(0)}</div>`);
 
-        for (let i = 1; i <= 28; i++) {
+        const MS_PER_DAY = 24 * 60 * 60 * 1000;
+        const dayStart = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+
+        let ovStartOffset = null, ovEndOffset = null;
+        if (ovulationStart && ovulationEnd) {
+            const ovStartDay = new Date(ovulationStart.getFullYear(), ovulationStart.getMonth(), ovulationStart.getDate());
+            const ovEndDay = new Date(ovulationEnd.getFullYear(), ovulationEnd.getMonth(), ovulationEnd.getDate());
+            ovStartOffset = Math.round((ovStartDay - dayStart) / MS_PER_DAY) + 1;
+            ovEndOffset = Math.round((ovEndDay - dayStart) / MS_PER_DAY) + 1;
+        }
+
+        const todayDay = new Date();
+        const today = new Date(todayDay.getFullYear(), todayDay.getMonth(), todayDay.getDate());
+        const todayOffset = Math.round((today - dayStart) / MS_PER_DAY) + 1;
+
+        for (let i = 1; i <= totalDays; i++) {
             let className = "cal-day";
-            if (i <= duration) className += " period"; 
-            if (i >= 12 && i <= 16) className += " ovulation"; 
+            if (i <= duration) className += " period";
+            if (ovStartOffset !== null && i >= ovStartOffset && i <= ovEndOffset) className += " ovulation";
+            if (i === todayOffset) className += " today";
 
             grid.innerHTML += `<div class="${className}">${i}</div>`;
         }
@@ -1363,6 +1418,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
     function toggleSymptom(element) {
         element.classList.toggle('selected');
+        const selected = Array.from(document.querySelectorAll('.symptom-item.selected'))
+            .map(el => el.textContent.trim());
+        saveUserData({ glow_symptoms: selected });
     }
 
     function saveSymptomsState() {
@@ -1388,8 +1446,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         
         list.innerHTML = '';
         cycleHistory.slice(0, 5).forEach((dateStr, idx) => {
-            list.innerHTML += `<li class="history-item"><span>سووڕی #${cycleHistory.length - idx}</span> <strong>${dateStr}</strong></li>`;
+            list.innerHTML += `<li class="history-item"><span>سووڕی #${cycleHistory.length - idx}</span> <strong>${dateStr}</strong> <i class="fa-solid fa-trash" style="color: var(--text-muted); cursor: pointer; margin-right: 8px;" onclick="deleteHistoryEntry(${idx})"></i></li>`;
         });
+    }
+
+    function deleteHistoryEntry(idx) {
+        if (!confirm("دڵنیایت لە سڕینەوەی ئەم تۆمارە؟")) return;
+        cycleHistory.splice(idx, 1);
+        saveUserData({ glow_cycle_history: cycleHistory });
+        renderHistoryUI();
+        if (cycleHistory.length === 0) {
+            document.getElementById('historyList').innerHTML = '<li style="text-align: center; color: var(--text-muted);">هیچ تۆمارێک نییە</li>';
+        }
     }
 
     function calculateBMI() {
@@ -1397,6 +1465,15 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const h = parseFloat(document.getElementById('userHeight').value) / 100;
 
         if(w > 0 && h > 0) {
+            if (w < 20 || w > 300) {
+                showToast("تکایە کێشێکی ڕاستی بنووسە (٢٠ تا ٣٠٠ کیلۆگرام).");
+                return;
+            }
+            if (h < 1.0 || h > 2.5) {
+                showToast("تکایە باڵایەکی ڕاستی بنووسە (١٠٠ تا ٢٥٠ سانتیمەتر).");
+                return;
+            }
+
             saveUserData({ glow_weight: w, glow_height: h * 100 });
             
             const bmi = (w / (h * h)).toFixed(1);
@@ -1431,14 +1508,22 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     function renderMedicationsUI() {
         const container = document.getElementById('medListContainer');
         container.innerHTML = '';
-        medications.forEach((med) => {
+        medications.forEach((med, idx) => {
             container.innerHTML += `
                 <div class="med-reminder-item">
                     <span>💊 <strong>${med.name}</strong></span>
                     <span>⏰ ${med.time}</span>
+                    <i class="fa-solid fa-trash" style="color: var(--text-muted); cursor: pointer;" onclick="deleteMedication(${idx})"></i>
                 </div>
             `;
         });
+    }
+
+    function deleteMedication(idx) {
+        if (!confirm("دڵنیایت لە سڕینەوەی ئەم بیرهێنەرەوەیە؟")) return;
+        medications.splice(idx, 1);
+        saveUserData({ glow_medications: medications });
+        renderMedicationsUI();
     }
 
     function updatePMSUI(val) {
@@ -1454,11 +1539,39 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     function exportMedicalReport() {
         const lastCycle = activeCycleStart ? activeCycleStart.toDateString() : 'N/A';
         const weight = document.getElementById('userWeight').value || 'N/A';
+        const height = document.getElementById('userHeight').value || 'N/A';
         const pmsScore = document.getElementById('pmsRange').value;
-        
-        const reportContent = `Glow Medical Comprehensive Report\n------------------------------------\nLast Period Start: ${lastCycle}\nBody Weight: ${weight} kg\nPMS Severity Score: ${pmsScore}/10\nDischarge Status: ${document.getElementById('dischargeSelect').value}\nHydration: ${waterCount}/8 glasses\n\nGenerated for Gynecologist Review.`;
-        
-        alert(reportContent);
+        const sleep = document.getElementById('sleepHours').value || 'N/A';
+        const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-item.selected'))
+            .map(el => el.textContent.trim()).join(', ') || 'None reported';
+        const medsList = medications.length
+            ? medications.map(m => `- ${m.name} at ${m.time}`).join('\n')
+            : 'None';
+
+        const reportContent = `Glow Medical Comprehensive Report\n` +
+            `Generated: ${new Date().toDateString()}\n` +
+            `------------------------------------\n` +
+            `Last Period Start: ${lastCycle}\n` +
+            `Body Weight: ${weight} kg\n` +
+            `Height: ${height} cm\n` +
+            `Sleep: ${sleep} hours\n` +
+            `PMS Severity Score: ${pmsScore}/10\n` +
+            `Discharge Status: ${document.getElementById('dischargeSelect').value}\n` +
+            `Hydration: ${waterCount}/8 glasses\n` +
+            `Symptoms: ${selectedSymptoms}\n` +
+            `Medications:\n${medsList}\n` +
+            `\nGenerated for Gynecologist Review.\n` +
+            `Note: This report is not a medical diagnosis. Please consult a qualified doctor.`;
+
+        const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Glow-Medical-Report-${new Date().toISOString().slice(0,10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     /* --- AI CHATBOT LOGIC WITH MEMORY (CHAT HISTORY) --- */
@@ -1477,6 +1590,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const input = document.getElementById('aiUserPrompt');
         const text = input.value.trim();
         if(!text) return;
+
+        if (!window._aiConsentGiven) {
+            const consented = confirm(
+                "ئاگاداری: نامەکانی ئەم چاتە دەنێردرێت بۆ خزمەتگوزاری AI-ی Google Gemini لە دەرەوەی ئەم ئەپە. ئایا ڕازیت؟"
+            );
+            if (!consented) return;
+            window._aiConsentGiven = true;
+        }
 
         appendAIMessage(text, 'user');
         input.value = '';
