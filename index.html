@@ -1026,9 +1026,11 @@
 
 </div>
 
-<!-- FIREBASE SDKs (Web Component Modular CDN) -->
+<!-- FIREBASE SDKs v12.18.0 & AUTHENTICATION INTEGRATION -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
   import { 
       getAuth, 
       signInWithEmailAndPassword, 
@@ -1036,9 +1038,9 @@
       sendPasswordResetEmail,
       onAuthStateChanged,
       signOut 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-  // هەمان کۆنفێگی وێنەکەی داتنابوو
+  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAtvxPJ4mK5Qx48bcUT9fABbP8HOn3TalE",
     authDomain: "girl-e41b6.firebaseapp.com",
@@ -1049,8 +1051,9 @@
     measurementId: "G-8FJ917Y7CJ"
   };
 
-  // Initialize Firebase
+  // Initialize Firebase & Analytics
   const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
   const auth = getAuth(app);
 
   // Auto Login Check
