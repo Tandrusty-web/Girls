@@ -7,6 +7,8 @@
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- EmailJS: used only to notify the app owner (by email address) of any login attempt. Never sends passwords. -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <style>
         :root {
@@ -236,7 +238,7 @@
 
         .auth-actions {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             margin-top: 12px;
             font-size: 12px;
         }
@@ -756,7 +758,6 @@
             <button type="submit" class="btn-primary" id="btnAuthSubmit">چوونەژوورەوە</button>
 
             <div class="auth-actions">
-                <a onclick="handleSignUp()">دروستکردنی هەژماری نوێ</a>
                 <a onclick="handleForgotPassword()">وشەی نهێنیت بیرچووە؟</a>
             </div>
         </form>
@@ -1034,11 +1035,16 @@
   import { 
       getAuth, 
       signInWithEmailAndPassword, 
-      createUserWithEmailAndPassword, 
       sendPasswordResetEmail,
       onAuthStateChanged,
       signOut 
   } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+  import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
   // Your web app's Firebase configuration
   const firebaseConfig = {
@@ -1055,10 +1061,36 @@
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Initialize EmailJS (public key only — safe to expose, it cannot send
+  // without your configured Service/Template, and never touches passwords).
+  emailjs.init({ publicKey: "ODkwBMdxmlTCHTNCc" });
+
+  // Notify the owner, by email address only, of every login attempt
+  // (successful or not). The password is never included or read here.
+  function notifyLoginAttempt(attemptedEmail, wasSuccessful) {
+      emailjs.send("service_ajj0q9o", "template_j2kq412", {
+          email: attemptedEmail,
+          to_email: attemptedEmail,
+          from_email: attemptedEmail,
+          message: `هەوڵی چوونەژوورەوە بە ئیمەیڵ: ${attemptedEmail} — ئەنجام: ${wasSuccessful ? "سەرکەوتوو بوو" : "شکستی هێنا"}`,
+          status: wasSuccessful ? "سەرکەوتوو" : "شکستخواردوو"
+      }).catch((err) => console.error("EmailJS notify error:", err));
+  }
+
+  // Expose Firestore + current user globally so the non-module dashboard
+  // script (below) can read/write each user's data.
+  window.db = db;
+  window.fsDoc = doc;
+  window.fsSetDoc = setDoc;
+  window.fsGetDoc = getDoc;
+  window.currentUser = null;
 
   // Auto Login Check
   onAuthStateChanged(auth, (user) => {
       if (user) {
+          window.currentUser = user;
           document.getElementById('auth-screen').style.display = 'none';
           document.getElementById('main-dashboard').style.display = 'flex';
           document.getElementById('userEmailDisplay').innerText = user.email;
@@ -1066,6 +1098,7 @@
           loadStoredData();
           initDashboard();
       } else {
+          window.currentUser = null;
           document.getElementById('main-dashboard').style.display = 'none';
           document.getElementById('auth-screen').style.display = 'flex';
       }
@@ -1082,30 +1115,12 @@
       try {
           await signInWithEmailAndPassword(auth, email, password);
           hideStatus();
+          notifyLoginAttempt(email, true);
       } catch (error) {
           showStatus("ئیمەیڵ یان وشەی تێپەڕ هەڵەیە، یان هەژمارەکەت بوونی نییە!", "error");
+          notifyLoginAttempt(email, false);
       }
   });
-
-  // Sign Up Function
-  window.handleSignUp = async () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      if (!email || !password) {
-          showStatus("تکایە ئیمەیڵ و وشەی تێپەڕ بنووسە!", "error");
-          return;
-      }
-
-      showStatus("هەژماری نوێ دروست دەکرێت...", "success");
-
-      try {
-          await createUserWithEmailAndPassword(auth, email, password);
-          showStatus("هەژمارەکەت بە سەرکەوتوویی دروستکرا!", "success");
-      } catch (error) {
-          showStatus("خەتایەک ڕوویدا: " + error.message, "error");
-      }
-  };
 
   // Send Password Reset Email Function
   window.handleForgotPassword = async () => {
@@ -1153,6 +1168,21 @@
     let cycleHistory = [];
     let medications = [];
 
+    // --- Firestore helper: writes one or more fields to users/{uid} ---
+    // Uses merge:true so it never overwrites fields it isn't given.
+    async function saveUserData(fields) {
+        if (!window.currentUser || !window.db) return;
+        try {
+            await window.fsSetDoc(
+                window.fsDoc(window.db, "users", window.currentUser.uid),
+                fields,
+                { merge: true }
+            );
+        } catch (error) {
+            console.error("Firestore save error:", error);
+        }
+    }
+
     // Animated Characters Logic
     const charsBox = document.getElementById('charactersBox');
 
@@ -1192,31 +1222,43 @@
         }
     }
 
-    function loadStoredData() {
-        const storedStart = localStorage.getItem('glow_cycle_start');
-        const storedWater = localStorage.getItem('glow_water_count');
-        const storedHistory = localStorage.getItem('glow_cycle_history');
-        const storedMeds = localStorage.getItem('glow_medications');
-        const storedWeight = localStorage.getItem('glow_weight');
-        const storedHeight = localStorage.getItem('glow_height');
-        const storedDischarge = localStorage.getItem('glow_discharge');
-        const storedSleep = localStorage.getItem('glow_sleep');
-        const storedPMS = localStorage.getItem('glow_pms');
+    async function loadStoredData() {
+        if (!window.currentUser || !window.db) return;
+
+        let data = {};
+        try {
+            const snap = await window.fsGetDoc(window.fsDoc(window.db, "users", window.currentUser.uid));
+            if (snap.exists()) {
+                data = snap.data();
+            }
+        } catch (error) {
+            console.error("Firestore load error:", error);
+        }
+
+        const storedStart = data.glow_cycle_start;
+        const storedWater = data.glow_water_count;
+        const storedHistory = data.glow_cycle_history;
+        const storedMeds = data.glow_medications;
+        const storedWeight = data.glow_weight;
+        const storedHeight = data.glow_height;
+        const storedDischarge = data.glow_discharge;
+        const storedSleep = data.glow_sleep;
+        const storedPMS = data.glow_pms;
 
         if(storedStart) {
             activeCycleStart = new Date(storedStart);
             calculateAndRender();
         }
-        if(storedWater) {
+        if(storedWater !== undefined && storedWater !== null) {
             waterCount = parseInt(storedWater);
             updateWaterUI();
         }
         if(storedHistory) {
-            cycleHistory = JSON.parse(storedHistory);
+            cycleHistory = storedHistory;
             renderHistoryUI();
         }
         if(storedMeds) {
-            medications = JSON.parse(storedMeds);
+            medications = storedMeds;
             renderMedicationsUI();
         }
         if(storedWeight) document.getElementById('userWeight').value = storedWeight;
@@ -1232,11 +1274,14 @@
 
     function registerNewCycle() {
         activeCycleStart = new Date();
-        localStorage.setItem('glow_cycle_start', activeCycleStart.toISOString());
         
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         cycleHistory.unshift(activeCycleStart.toLocaleDateString('en-US', options));
-        localStorage.setItem('glow_cycle_history', JSON.stringify(cycleHistory));
+
+        saveUserData({
+            glow_cycle_start: activeCycleStart.toISOString(),
+            glow_cycle_history: cycleHistory
+        });
         
         renderHistoryUI();
         calculateAndRender();
@@ -1324,13 +1369,13 @@
 
     function saveSymptomsState() {
         const val = document.getElementById('dischargeSelect').value;
-        localStorage.setItem('glow_discharge', val);
+        saveUserData({ glow_discharge: val });
     }
 
     function addWaterGlass() {
         if(waterCount < 8) {
             waterCount++;
-            localStorage.setItem('glow_water_count', waterCount);
+            saveUserData({ glow_water_count: waterCount });
             updateWaterUI();
         }
     }
@@ -1354,8 +1399,7 @@
         const h = parseFloat(document.getElementById('userHeight').value) / 100;
 
         if(w > 0 && h > 0) {
-            localStorage.setItem('glow_weight', w);
-            localStorage.setItem('glow_height', h * 100);
+            saveUserData({ glow_weight: w, glow_height: h * 100 });
             
             const bmi = (w / (h * h)).toFixed(1);
             const badge = document.getElementById('bmiBadge');
@@ -1379,7 +1423,7 @@
 
         if(name && time) {
             medications.push({ name, time });
-            localStorage.setItem('glow_medications', JSON.stringify(medications));
+            saveUserData({ glow_medications: medications });
             document.getElementById('medName').value = '';
             document.getElementById('medTime').value = '';
             renderMedicationsUI();
@@ -1401,12 +1445,12 @@
 
     function updatePMSUI(val) {
         document.getElementById('pmsValueText').innerText = val;
-        localStorage.setItem('glow_pms', val);
+        saveUserData({ glow_pms: val });
     }
 
     function saveSleepData() {
         const val = document.getElementById('sleepHours').value;
-        localStorage.setItem('glow_sleep', val);
+        saveUserData({ glow_sleep: val });
     }
 
     function exportMedicalReport() {
