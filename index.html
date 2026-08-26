@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Glow Pro - Advanced Women's Health System</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #e07a5f;
+            --primary-soft: #f4f1de;
+            --accent: #81b29a;
+            --purple: #9d8189;
+            --ai-color: #6c5ce7;
+            --ai-soft: #a29bfe;
+            --bg: #faf7f5;
+            --card-bg: #ffffff;
+            --text-dark: #2b2d42;
+            --text-muted: #8d99ae;
+            --border: #f0e6e1;
+            --radius-lg: 0px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazirmatn', 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            max-height: 100dvh;
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 481px) {
+            .app-container {
+                height: 92vh;
+                border-radius: 24px;
+                overflow: hidden;
+                border: 1px solid var(--border);
+            }
+        }
+
+        /* --- AUTH SCREEN --- */
+        #auth-screen {
+            padding: 30px 25px;
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .avatar-characters-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 12px;
+            height: 90px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .char {
+            width: 55px;
+            height: 65px;
+            border-radius: 30px 30px 15px 15px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            justify-content: center;
+        }
+
+        .char-1 { background: #ffb5a7; height: 60px; }
+        .char-2 { background: #cdb4db; height: 75px; }
+        .char-3 { background: #fec5bb; height: 55px; }
+
+        .eyes {
+            display: flex;
+            gap: 10px;
+            position: absolute;
+            top: 18px;
+            transition: all 0.2s;
+        }
+
+        .eye {
+            width: 10px;
+            height: 10px;
+            background: #2b2d42;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .pupil {
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 1px;
+            right: 1px;
+        }
+
+        .hands {
+            position: absolute;
+            width: 100%;
+            top: 22px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 4px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .hand {
+            width: 14px;
+            height: 14px;
+            background: #2b2d42;
+            border-radius: 50%;
+        }
+
+        .shy .eyes {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .shy .hands {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .app-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .app-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i.input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .input-wrapper i.toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 13px 40px 13px 40px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            outline: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: #fcfbf9;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary);
+            background: #fff;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(224, 122, 95, 0.2);
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: #ffe5d9;
+            color: #d00000;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        /* --- DASHBOARD SCREEN & MOBILE APP LAYOUT --- */
+        #main-dashboard {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            background: #fde2e4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        /* Tab Content Wrapper */
+        .tab-content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--bg);
+        }
+
+        .tab-page {
+            display: none;
+        }
+
+        .tab-page.active {
+            display: block;
+        }
+
+        /* Bottom Mobile Navigation Bar */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #ffffff;
+            border-top: 1px solid var(--border);
+            padding: 8px 0;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 10.5px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 20%;
+            transition: all 0.2s;
+        }
+
+        .nav-item i {
+            font-size: 17px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .nav-item.ai-tab.active {
+            color: var(--ai-color);
+        }
+
+        .card-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .card-header-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-dark);
+        }
+
+        .card-header-title i {
+            color: var(--primary);
+        }
+
+        /* Tracker Main View */
+        .cycle-action-area {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(224, 122, 95, 0.3);
+        }
+
+        .cycle-status-display {
+            margin-top: 15px;
+            background: #fdfaf8;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px dashed #f2d6cc;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-value {
+            font-weight: 700;
+            color: var(--primary);
+            direction: ltr;
+        }
+
+        /* Interactive Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .cal-day-head {
+            font-weight: bold;
+            color: var(--text-muted);
+            padding-bottom: 5px;
+        }
+
+        .cal-day {
+            padding: 8px 0;
+            border-radius: 8px;
+            background: #faf7f5;
+            color: var(--text-dark);
+        }
+
+        .cal-day.period {
+            background: #e07a5f;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .cal-day.ovulation {
+            background: #81b29a;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* Mood Tracker */
+        .symptom-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .symptom-item {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 5px;
+            text-align: center;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .symptom-item i {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 4px;
+            color: var(--purple);
+        }
+
+        .symptom-item.selected {
+            background: #f4f1de;
+            border-color: var(--accent);
+        }
+
+        /* Config Box */
+        .config-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .config-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .config-row select, .config-row input {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 13px;
+        }
+
+        .advice-box {
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: #495057;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border-right: 3px solid var(--accent);
+        }
+
+        .water-tracker {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .water-btn {
+            background: #e0f2fe;
+            color: #0284c7;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .history-list {
+            list-style: none;
+            font-size: 12px;
+            color: var(--text-dark);
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .disclaimer-box {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+
+        .range-slider {
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        .bmi-result-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #e9ecef;
+        }
+
+        .med-reminder-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #faf7f5;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .emergency-tip {
+            font-size: 12px;
+            line-height: 1.5;
+            background: #fff3bf;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 6px;
+            border-right: 3px solid #fcc419;
+        }
+
+        /* --- AI CHATBOT SYSTEM STYLES --- */
+        .ai-chat-box {
+            display: flex;
+            flex-direction: column;
+            height: 380px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #fcfbfe;
+        }
+
+        .msg-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 12.5px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .msg-ai {
+            align-self: flex-start;
+            background: #f0edff;
+            color: #3c2a9c;
+            border-bottom-right-radius: 2px;
+            border: 1px solid #e1dbff;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: var(--primary);
+            color: #fff;
+            border-bottom-left-radius: 2px;
+        }
+
+        .ai-input-area {
+            display: flex;
+            padding: 8px;
+            border-top: 1px solid var(--border);
+            background: #fff;
+            gap: 6px;
+        }
+
+        .ai-input-area input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            outline: none;
+            font-size: 12.5px;
+        }
+
+        .ai-send-btn {
+            background: var(--ai-color);
+            color: white;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-prompts {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 6px 0;
+            margin-bottom: 8px;
+            scrollbar-width: none;
+        }
+
+        .quick-btn {
+            white-space: nowrap;
+            background: #f0edff;
+            color: var(--ai-color);
+            border: 1px solid #d8d0ff;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .ai-typing {
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- ANIMATED AUTHENTICATION SCREEN -->
+    <div id="auth-screen">
+        
+        <div class="avatar-characters-container" id="charactersBox">
+            <div class="char char-1">
+                <div class="eyes"><div class="eye"><div class="pupil"></div></div><div class="eye"><div class="pupil"></div></div></div>
+                <div class="hands"><div class="hand"></div><div class="hand"></div></div>
+            </div>
+            <div class="char char-2">
+                <div class="eyes"><div class="eye"><div class="pupil"></div></div><div class="eye"><div class="pupil"></div></div></div>
+                <div class="hands"><div class="hand"></div><div class="hand"></div></div>
+            </div>
+            <div class="char char-3">
+                <div class="eyes"><div class="eye"><div class="pupil"></div></div><div class="eye"><div class="pupil"></div></div></div>
+                <div class="hands"><div class="hand"></div><div class="hand"></div></div>
+            </div>
+        </div>
+
+        <div class="app-title">Glow Care</div>
+        <div class="app-subtitle">سیستمی پرۆفێشیناڵی چاودێری تەندروستی کچان</div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>ئیمەیڵ</label>
+                <div class="input-wrapper">
+                    <input type="email" id="email" placeholder="ئیمەیڵەکەت بنووسە..." required onfocus="setLookState()" onblur="resetState()">
+                    <i class="fa-solid fa-envelope input-icon"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>وشەی تێپەڕ</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" placeholder="••••••••" required onfocus="setShyState()" onblur="resetState()">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <i class="fa-solid fa-eye toggle-password" id="togglePasswordBtn" onclick="togglePasswordVisibility()"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">چوونەژوورەوە</button>
+        </form>
+
+        <div id="errorMessage" class="error-message">
+            ئیمەیڵ یان وشەی تێپەڕەکەت هەڵەیە! تکایە دووبارە هەوڵبدەرەوە.
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="main-dashboard">
+        
+        <!-- App Top Bar -->
+        <div class="dash-header">
+            <div class="user-profile">
+                <div class="avatar">G</div>
+                <div>
+                    <div style="font-size: 14px; font-weight: 700;">بەخێربێیت</div>
+                    <div style="font-size: 11px; color: var(--text-muted);" id="todayDate">----</div>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-sign-out"></i> دەرچوون</button>
+        </div>
+
+        <!-- Scrollable Tab Content Area -->
+        <div class="tab-content-area">
+
+            <!-- TAB 1: HOME / TRACKER -->
+            <div id="tab-home" class="tab-page active">
+                
+                <!-- Cycle Settings -->
+                <div class="card-box">
+                    <div class="config-row">
+                        <span>تێکڕای درێژی سووڕەکە:</span>
+                        <select id="cycleLengthSelect" onchange="saveConfigAndRecalculate()">
+                            <option value="21">21 ڕۆژ</option>
+                            <option value="28" selected>28 ڕۆژ (ئاسایی)</option>
+                            <option value="30">30 ڕۆژ</option>
+                            <option value="35">35 ڕۆژ</option>
+                            <option value="irregular">ناڕێک (Irregular / PCOS)</option>
+                        </select>
+                    </div>
+                    <div class="config-row" style="margin-top: 8px;">
+                        <span>ماوەی خوێنبەربوون (ڕۆژ):</span>
+                        <select id="periodDurationSelect" onchange="saveConfigAndRecalculate()">
+                            <option value="3">3 ڕۆژ</option>
+                            <option value="4">4 ڕۆژ</option>
+                            <option value="5" selected>5 ڕۆژ</option>
+                            <option value="6">6 ڕۆژ</option>
+                            <option value="7">7 ڕۆژ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Main Tracker Section -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-heart-pulse"></i> تۆمارکردنی سووڕی نوێ
+                    </div>
+
+                    <div class="cycle-action-area">
+                        <button class="action-btn" onclick="registerNewCycle()">
+                            <i class="fa-solid fa-plus"></i> ئەمڕۆ سووڕەکەم دەستی پێکرد
+                        </button>
+
+                        <div class="cycle-status-display">
+                            <div class="status-item">
+                                <span>سووڕی داهاتوو:</span>
+                                <span class="status-value" id="nextPeriodText">دیاری نەکراوە</span>
+                            </div>
+                            <div class="status-item">
+                                <span>قۆناغی پیتاندن (Ovulation Window):</span>
+                                <span class="status-value" id="ovulationText">دیاری نەکراوە</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Overview -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-calendar-days"></i> ڕووکاری ڕۆژژمێر
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar content generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Medical Advisory -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-user-doctor"></i> ڕێنمایی پزیشکی بەپێی قۆناغ
+                    </div>
+                    <div class="advice-box" id="adviceContainer">
+                        تکایە دوگمەی "ئەمڕۆ سووڕەکەم دەستی پێکرد" داگرە بۆ دەستکەوتنی ڕێنمایی پزیشکی بەپێی قۆناغی سووڕەکەت.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: HEALTH & LOGS -->
+            <div id="tab-health" class="tab-page">
+                
+                <!-- Weight & BMI Tracker -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-weight-scale"></i> تۆماری کێش و شێوازی جەستە (BMI)
+                    </div>
+                    <div class="config-row">
+                        <span>کێش (کگم):</span>
+                        <input type="number" id="userWeight" placeholder="60" style="width: 70px;" onchange="calculateBMI()">
+                    </div>
+                    <div class="config-row" style="margin-top: 6px;">
+                        <span>بەژن (سم):</span>
+                        <input type="number" id="userHeight" placeholder="165" style="width: 70px;" onchange="calculateBMI()">
+                    </div>
+                    <div class="config-row" style="margin-top: 10px;">
+                        <span>بارودۆخی کێش:</span>
+                        <span id="bmiBadge" class="bmi-result-badge">دیاری نەکراوە</span>
+                    </div>
+                </div>
+
+                <!-- Hydration Tracker -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-glass-water"></i> بڕی ئاوخواردنەوەی ئەمڕۆ
+                    </div>
+                    <div class="water-tracker">
+                        <span id="waterCountText" style="font-size: 13px; font-weight: 600;">0 / 8 پەرداخ</span>
+                        <button class="water-btn" onclick="addWaterGlass()"><i class="fa-solid fa-plus"></i> پەرداخێک زیادبکە</button>
+                    </div>
+                </div>
+
+                <!-- Sleep & Energy Tracker -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-bed"></i> تێکڕای خەو و ئاستی وزە
+                    </div>
+                    <div class="config-row">
+                        <span>کاتژمێرەکانی خەوی شەوانە:</span>
+                        <select id="sleepHours" onchange="saveSleepData()">
+                            <option value="5">کەمتر لە ٦ کاتژمێر (کەمخەوی)</option>
+                            <option value="7" selected>٧ - ٨ کاتژمێر (ئاسایی)</option>
+                            <option value="9">زیاتر لە ٩ کاتژمێر</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- PMS Severity Scale -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-chart-line"></i> پێوەری توندیی نیشانەکانی پێش سووڕ (PMS Scale)
+                    </div>
+                    <div style="font-size: 12px; margin-bottom: 5px;">ئاستی ئازار و دڵڕاوکێ (١ تا ۱۰): <strong id="pmsValueText">5</strong></div>
+                    <input type="range" min="1" max="10" value="5" class="range-slider" id="pmsRange" oninput="updatePMSUI(this.value)">
+                </div>
+
+                <!-- Cervical Discharge & Symptoms -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-notes-medical"></i> تۆماری دەردراوەکان و نیشانەکان
+                    </div>
+                    <div class="config-row" style="margin-bottom: 10px;">
+                        <span>جۆری دەردراوی جەستە:</span>
+                        <select id="dischargeSelect" onchange="saveSymptomsState()">
+                            <option value="normal">ئاسایی / وشک</option>
+                            <option value="sticky">تڕ و چەسپاو (Sticky)</option>
+                            <option value="eggwhite">روون و بەناوبانگ (Egg-white / Ovulation)</option>
+                        </select>
+                    </div>
+                    <div class="symptom-grid">
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-face-frown"></i>ئازار</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-battery-quarter"></i>ماندوو</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-face-smile-beam"></i>ئارام</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-bolt"></i>پڕ وزە</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 3: AI ASSISTANT (NEW) -->
+            <div id="tab-ai" class="tab-page">
+                <div class="card-box">
+                    <div class="card-header-title" style="color: var(--ai-color);">
+                        <i class="fa-solid fa-robot" style="color: var(--ai-color);"></i> ڕاوێژکاری تەندروستی زیرەک (AI)
+                    </div>
+                    <p style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 10px;">
+                        سڵاو! من یارمەتیدەری زیرەکی تۆم. دەتوانیت پرسیارم لێبکەیت یان داوای شیکاریی تەندروستیت بکەیت.
+                    </p>
+
+                    <!-- Quick Prompt Buttons -->
+                    <div class="quick-prompts">
+                        <button class="quick-btn" onclick="sendQuickPrompt('چۆن ئازاری سک کەم بکەمەوە؟')">🌸 کەمکردنەوەی ئازار</button>
+                        <button class="quick-btn" onclick="sendQuickPrompt('چ خواردنێک بۆ سووڕی مانگانە باشە؟')">🥗 خواردنی بەسوود</button>
+                        <button class="quick-btn" onclick="analyzeUserDataWithAI()">📊 شیکاریی داتاکانم بکە</button>
+                    </div>
+
+                    <!-- Chat Container -->
+                    <div class="ai-chat-box">
+                        <div class="ai-chat-messages" id="aiChatContainer">
+                            <div class="msg-bubble msg-ai">
+                                سڵاو! 🌸 من ئامادەم بۆ وەڵامدانەوەی پرسیارە تەندروستییەکانت یان پێدانی ئامۆژگاری بۆ سووڕی مانگانەکەت.
+                            </div>
+                        </div>
+                        <div class="ai-input-area">
+                            <input type="text" id="aiUserPrompt" placeholder="پرسیارەکەت بنووسە..." onkeypress="handleAIEnergyKey(event)">
+                            <button class="ai-send-btn" onclick="submitUserAIQuery()"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: REMINDERS & RELIEF -->
+            <div id="tab-reminders" class="tab-page">
+                
+                <!-- Medication Reminder -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-pills"></i> بیرهێنەرەوەی حەب و ڤیتامینەکان
+                    </div>
+                    <div class="config-row">
+                        <span>ناوی دەرمان:</span>
+                        <input type="text" id="medName" placeholder="ڤیتامین D / ئاسن" style="width: 140px;">
+                    </div>
+                    <div class="config-row" style="margin-top: 6px;">
+                        <span>کاتژمێری خواردن:</span>
+                        <input type="time" id="medTime" style="width: 110px;">
+                    </div>
+                    <button class="btn-secondary" style="margin-top: 8px;" onclick="addMedication()"><i class="fa-solid fa-plus"></i> زیادهێنانی بیرهێنەرەوە</button>
+                    <div id="medListContainer" style="margin-top: 8px;">
+                        <!-- Dynamic medication items -->
+                    </div>
+                </div>
+
+                <!-- Emergency Relief Guide -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-kit-medical"></i> فریاگوزاری یەکەمین بۆ ئازاری توندی منداڵدان
+                    </div>
+                    <div class="emergency-tip">
+                        💡 <strong>ڕێنمایی کەمکردنەوەی ئازار:</strong> کیسەی ئاوی گەرم بخەرە سەر ناوقەد، چای بابۆنە یان زەنجەفیل بنۆشە، و کێشانی نەرمی حەوز ئەنجام بدە.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 5: REPORTS & HISTORY -->
+            <div id="tab-reports" class="tab-page">
+                
+                <!-- History Log -->
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i> مێژووی سووڕەکانی پێشوو
+                    </div>
+                    <ul class="history-list" id="historyList">
+                        <li style="text-align: center; color: var(--text-muted);">هیچ تۆمارێک نییە</li>
+                    </ul>
+                    <button class="btn-secondary" onclick="exportMedicalReport()"><i class="fa-solid fa-file-pdf"></i> دەرکردنی ڕاپۆرتی پزیشکی</button>
+                </div>
+
+                <!-- Legal Disclaimer -->
+                <div class="disclaimer-box">
+                    ⚠️ <strong>تێبینی پزیشکی:</strong> ئەم ئەپە تەنها بۆ هاوکاری هەژمارکردنە و ناتوانرێت وەک ڕێگریی لە دووگیانیی یان دیاری کردنی کێشەی تەندروستی بەکاربهێنرێت. لە کاتی ئازاری زۆر توند سەردانی پزیشک بکە.
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('tab-home', this)">
+                <i class="fa-solid fa-house"></i>
+                <span>سەرەکی</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-health', this)">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>تەندروستی</span>
+            </div>
+            <div class="nav-item ai-tab" onclick="switchTab('tab-ai', this)">
+                <i class="fa-solid fa-robot"></i>
+                <span>ڕاوێژکاری AI</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-reminders', this)">
+                <i class="fa-solid fa-bell"></i>
+                <span>بیرهێنەرەوە</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-reports', this)">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>ڕاپۆرت</span>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    const CONFIG = {
+        correctPassword: "12345678"
+    };
+
+    let activeCycleStart = null;
+    let waterCount = 0;
+    let cycleHistory = [];
+    let medications = [];
+
+    // Animated Characters Logic
+    const charsBox = document.getElementById('charactersBox');
+
+    function setShyState() { charsBox.classList.add('shy'); }
+    function setLookState() { charsBox.classList.remove('shy'); }
+    function resetState() { charsBox.classList.remove('shy'); }
+
+    function togglePasswordVisibility() {
+        const passInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            toggleBtn.classList.replace('fa-eye', 'fa-eye-slash');
+            charsBox.classList.remove('shy');
+        } else {
+            passInput.type = 'password';
+            toggleBtn.classList.replace('fa-eye-slash', 'fa-eye');
+            charsBox.classList.add('shy');
+        }
+    }
+
+    // Login Handling
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const password = document.getElementById('password').value;
+
+        if (password === CONFIG.correctPassword) {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-dashboard').style.display = 'flex';
+            loadStoredData();
+            initDashboard();
+        } else {
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    });
+
+    function logout() {
+        document.getElementById('main-dashboard').style.display = 'none';
+        document.getElementById('auth-screen').style.display = 'flex';
+        document.getElementById('password').value = '';
+        resetState();
+    }
+
+    // Tab Navigation Logic
+    function switchTab(tabId, navBtn) {
+        document.querySelectorAll('.tab-page').forEach(page => page.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        navBtn.classList.add('active');
+    }
+
+    function initDashboard() {
+        const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('todayDate').innerText = new Date().toLocaleDateString('en-US', options);
+        if(!activeCycleStart) {
+            renderEmptyCalendar();
+        }
+    }
+
+    function loadStoredData() {
+        const storedStart = localStorage.getItem('glow_cycle_start');
+        const storedWater = localStorage.getItem('glow_water_count');
+        const storedHistory = localStorage.getItem('glow_cycle_history');
+        const storedMeds = localStorage.getItem('glow_medications');
+        const storedWeight = localStorage.getItem('glow_weight');
+        const storedHeight = localStorage.getItem('glow_height');
+        const storedDischarge = localStorage.getItem('glow_discharge');
+        const storedSleep = localStorage.getItem('glow_sleep');
+        const storedPMS = localStorage.getItem('glow_pms');
+
+        if(storedStart) {
+            activeCycleStart = new Date(storedStart);
+            calculateAndRender();
+        }
+        if(storedWater) {
+            waterCount = parseInt(storedWater);
+            updateWaterUI();
+        }
+        if(storedHistory) {
+            cycleHistory = JSON.parse(storedHistory);
+            renderHistoryUI();
+        }
+        if(storedMeds) {
+            medications = JSON.parse(storedMeds);
+            renderMedicationsUI();
+        }
+        if(storedWeight) document.getElementById('userWeight').value = storedWeight;
+        if(storedHeight) document.getElementById('userHeight').value = storedHeight;
+        if(storedWeight && storedHeight) calculateBMI();
+        if(storedDischarge) document.getElementById('dischargeSelect').value = storedDischarge;
+        if(storedSleep) document.getElementById('sleepHours').value = storedSleep;
+        if(storedPMS) {
+            document.getElementById('pmsRange').value = storedPMS;
+            document.getElementById('pmsValueText').innerText = storedPMS;
+        }
+    }
+
+    function registerNewCycle() {
+        activeCycleStart = new Date();
+        localStorage.setItem('glow_cycle_start', activeCycleStart.toISOString());
+        
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        cycleHistory.unshift(activeCycleStart.toLocaleDateString('en-US', options));
+        localStorage.setItem('glow_cycle_history', JSON.stringify(cycleHistory));
+        
+        renderHistoryUI();
+        calculateAndRender();
+    }
+
+    function saveConfigAndRecalculate() {
+        if (activeCycleStart) {
+            calculateAndRender();
+        }
+    }
+
+    function calculateAndRender() {
+        const cycleVal = document.getElementById('cycleLengthSelect').value;
+        const durationVal = parseInt(document.getElementById('periodDurationSelect').value) || 5;
+        const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+
+        if (cycleVal === "irregular") {
+            document.getElementById('nextPeriodText').innerText = "نادیار (سووڕی ناڕێک)";
+            document.getElementById('ovulationText').innerText = "مەودای نادیار (PCOS)";
+            updateMedicalAdvice("irregular");
+            renderCalendar(activeCycleStart, null, null, durationVal);
+            return;
+        }
+
+        const cycleLength = parseInt(cycleVal);
+
+        const nextPeriod = new Date(activeCycleStart);
+        nextPeriod.setDate(activeCycleStart.getDate() + cycleLength);
+
+        const ovulationPeak = new Date(nextPeriod);
+        ovulationPeak.setDate(nextPeriod.getDate() - 14);
+
+        const ovulationStart = new Date(ovulationPeak);
+        ovulationStart.setDate(ovulationPeak.getDate() - 3);
+
+        const ovulationEnd = new Date(ovulationPeak);
+        ovulationEnd.setDate(ovulationPeak.getDate() + 1);
+
+        document.getElementById('nextPeriodText').innerText = nextPeriod.toLocaleDateString('en-US', options);
+        document.getElementById('ovulationText').innerText = `${ovulationStart.getDate()} - ${ovulationEnd.getDate()} ${ovulationEnd.toLocaleDateString('en-US', {month: 'short'})}`;
+
+        updateMedicalAdvice("regular");
+        renderCalendar(activeCycleStart, ovulationStart, nextPeriod, durationVal);
+    }
+
+    function updateMedicalAdvice(type) {
+        if(type === "irregular") {
+            document.getElementById('adviceContainer').innerHTML = 
+                "<strong>تێبینی پزیشکی سووڕی ناڕێک:</strong> پێویستە سەردانی پزیشکی ئافرەتان بکەیت بۆ پشکنینی هۆڕمۆنەکان و سۆنەر. وەرزشی سووک و کەمکردنەوەی شەکر زۆر بەسوودە.";
+        } else {
+            document.getElementById('adviceContainer').innerHTML = 
+                "<strong>ڕێنمایی قۆناغی سووڕ:</strong> خواردنەوەی ئاوی گەرم، ئاسن، و پشوو وەرگرتن ئەرکی جەستەت ئاسانتر دەکات. خۆت لە دڵڕاوکێ بەدوور بگرە.";
+        }
+    }
+
+    function renderEmptyCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        days.forEach(d => grid.innerHTML += `<div class="cal-day-head">${d}</div>`);
+        
+        for (let i = 1; i <= 14; i++) {
+            grid.innerHTML += `<div class="cal-day">${i}</div>`;
+        }
+    }
+
+    function renderCalendar(start, ovulation, next, duration) {
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+        const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        days.forEach(d => grid.innerHTML += `<div class="cal-day-head">${d}</div>`);
+
+        for (let i = 1; i <= 28; i++) {
+            let className = "cal-day";
+            if (i <= duration) className += " period"; 
+            if (i >= 12 && i <= 16) className += " ovulation"; 
+
+            grid.innerHTML += `<div class="${className}">${i}</div>`;
+        }
+    }
+
+    function toggleSymptom(element) {
+        element.classList.toggle('selected');
+    }
+
+    function saveSymptomsState() {
+        const val = document.getElementById('dischargeSelect').value;
+        localStorage.setItem('glow_discharge', val);
+    }
+
+    function addWaterGlass() {
+        if(waterCount < 8) {
+            waterCount++;
+            localStorage.setItem('glow_water_count', waterCount);
+            updateWaterUI();
+        }
+    }
+
+    function updateWaterUI() {
+        document.getElementById('waterCountText').innerText = `${waterCount} / 8 پەرداخ`;
+    }
+
+    function renderHistoryUI() {
+        const list = document.getElementById('historyList');
+        if(cycleHistory.length === 0) return;
+        
+        list.innerHTML = '';
+        cycleHistory.slice(0, 5).forEach((dateStr, idx) => {
+            list.innerHTML += `<li class="history-item"><span>سووڕی #${cycleHistory.length - idx}</span> <strong>${dateStr}</strong></li>`;
+        });
+    }
+
+    function calculateBMI() {
+        const w = parseFloat(document.getElementById('userWeight').value);
+        const h = parseFloat(document.getElementById('userHeight').value) / 100;
+
+        if(w > 0 && h > 0) {
+            localStorage.setItem('glow_weight', w);
+            localStorage.setItem('glow_height', h * 100);
+            
+            const bmi = (w / (h * h)).toFixed(1);
+            const badge = document.getElementById('bmiBadge');
+            
+            if(bmi < 18.5) {
+                badge.innerText = `کەم کێش (${bmi})`;
+                badge.style.background = '#ffe3e3';
+            } else if(bmi <= 24.9) {
+                badge.innerText = `کێشی گونجاو (${bmi})`;
+                badge.style.background = '#d3f9d8';
+            } else {
+                badge.innerText = `کێشی زیادە (${bmi})`;
+                badge.style.background = '#fff3bf';
+            }
+        }
+    }
+
+    function addMedication() {
+        const name = document.getElementById('medName').value;
+        const time = document.getElementById('medTime').value;
+
+        if(name && time) {
+            medications.push({ name, time });
+            localStorage.setItem('glow_medications', JSON.stringify(medications));
+            document.getElementById('medName').value = '';
+            document.getElementById('medTime').value = '';
+            renderMedicationsUI();
+        }
+    }
+
+    function renderMedicationsUI() {
+        const container = document.getElementById('medListContainer');
+        container.innerHTML = '';
+        medications.forEach((med) => {
+            container.innerHTML += `
+                <div class="med-reminder-item">
+                    <span>💊 <strong>${med.name}</strong></span>
+                    <span>⏰ ${med.time}</span>
+                </div>
+            `;
+        });
+    }
+
+    function updatePMSUI(val) {
+        document.getElementById('pmsValueText').innerText = val;
+        localStorage.setItem('glow_pms', val);
+    }
+
+    function saveSleepData() {
+        const val = document.getElementById('sleepHours').value;
+        localStorage.setItem('glow_sleep', val);
+    }
+
+    function exportMedicalReport() {
+        const lastCycle = activeCycleStart ? activeCycleStart.toDateString() : 'N/A';
+        const weight = document.getElementById('userWeight').value || 'N/A';
+        const pmsScore = document.getElementById('pmsRange').value;
+        
+        const reportContent = `Glow Medical Comprehensive Report\n------------------------------------\nLast Period Start: ${lastCycle}\nBody Weight: ${weight} kg\nPMS Severity Score: ${pmsScore}/10\nDischarge Status: ${document.getElementById('dischargeSelect').value}\nHydration: ${waterCount}/8 glasses\n\nGenerated for Gynecologist Review.`;
+        
+        alert(reportContent);
+    }
+
+    /* --- AI HEALTH ASSISTANT LOGIC --- */
+    function submitUserAIQuery() {
+        const input = document.getElementById('aiUserPrompt');
+        const text = input.value.trim();
+        if(!text) return;
+
+        appendAIMessage(text, 'user');
+        input.value = '';
+
+        // Typing effect
+        const typingId = appendAIMessage('🤖 AI لە حالەتی بیرکردنەوەدایە...', 'ai ai-typing');
+
+        setTimeout(() => {
+            document.getElementById(typingId).remove();
+            generateAIResponse(text);
+        }, 1200);
+    }
+
+    function handleAIEnergyKey(e) {
+        if(e.key === 'Enter') submitUserAIQuery();
+    }
+
+    function sendQuickPrompt(promptText) {
+        document.getElementById('aiUserPrompt').value = promptText;
+        submitUserAIQuery();
+    }
+
+    function appendAIMessage(text, sender) {
+        const chatBox = document.getElementById('aiChatContainer');
+        const msgId = 'msg-' + Date.now();
+        const msgDiv = document.createElement('div');
+        msgDiv.id = msgId;
+        msgDiv.className = `msg-bubble msg-${sender}`;
+        msgDiv.innerText = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return msgId;
+    }
+
+    function generateAIResponse(query) {
+        let reply = "بۆ زانیاری پزیشکی وردتر، پێشنیار دەکەم سەردانی پزیشکی ئافرەتان بکەیت. بەڵام لە ڕووی تەندروستی گشتییەوە، پشوو و خواردنەوەی ئاوی گەرم یارمەتیدەرە.";
+
+        if(query.includes('ئازار') || query.includes('سک')) {
+            reply = "🌸 **ڕێنمایی AI بۆ کەمکردنەوەی ئازار:**\n١. کۆمپرێسی گەرم (کیسەی ئاوی گەرم) بخەرە سەر نادیار یان پشتی خوارەوەت.\n٢. چای بابۆنە یان زەنجەفیل بنۆشە کە دژە هەوکردنن.\n٣. بەکارهێنانی مەگنیسیۆم بە ڕاوێژی پزیشک ئازاری منداڵدان سست دەکاتەوە.";
+        } else if(query.includes('خواردن') || query.includes('سووڕ')) {
+            reply = "🥗 **خواردنە بەسوودەکان لەم قۆناغەدا:**\n• خواردنی دەوڵەمەند بە ئاسن وەک (سپێناخ، گۆشتی سور، و نۆک).\n• شۆکۆلاتەی تۆخ (Dark Chocolate) بۆ بەرزکردنەوەی هۆڕمۆنی سێرۆتۆنین.\n• دوورکەوتنەوە لە خوێ و کافایینی زیادە تا تووشی تەنفۆخ و دڵڕاوکێ نەبیت.";
+        }
+
+        appendAIMessage(reply, 'ai');
+    }
+
+    function analyzeUserDataWithAI() {
+        appendAIMessage('📊 شیکاریی تەندروستی داتاکانی من بکە', 'user');
+        
+        const typingId = appendAIMessage('🤖 AI لە حالەتی شیکاری داتاکاندایە...', 'ai ai-typing');
+
+        setTimeout(() => {
+            document.getElementById(typingId).remove();
+            
+            const pms = document.getElementById('pmsRange').value;
+            const water = waterCount;
+            const sleep = document.getElementById('sleepHours').value;
+
+            let report = `✨ **ڕاپۆرتی شیکاریی AI بۆ تەندروستیت:**\n`;
+            report += `• **ئاستی ئازار (PMS):** ${pms}/10 ${pms > 6 ? '⚠️ (ئازارەکەت کەمێک بەرزە، پشوو وەربگرە)' : '✅ (ئاستی ئاساییە)'}\n`;
+            report += `• **ڕێژەی ئاوخواردنەوە:** ${water}/8 پەرداخ ${water < 5 ? '💧 (پێویستە ئاوی زیاتر بخۆیتەوە)' : '💙 (زۆر باشە)'}\n`;
+            report += `• **تێکڕای خەو:** ${sleep} کاتژمێر.\n\n💡 **ئامۆژگاری:** خۆت لە سترێس بەدوور بگرە و کۆمپرێسی گەرم بەکاربهێنە.`;
+
+            appendAIMessage(report, 'ai');
+        }, 1500);
+    }
+</script>
+
+</body>
+</html>
