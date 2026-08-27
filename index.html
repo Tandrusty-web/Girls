@@ -1029,12 +1029,8 @@
                             <input type="date" id="bcInsertedDate" onchange="saveBirthControl()">
                         </div>
                         <div class="config-row" style="margin-top: 6px;">
-                            <span>ماوەی کارکردن:</span>
-                            <select id="bcDurationYears" onchange="saveBirthControl()">
-                                <option value="3">٣ ساڵ</option>
-                                <option value="5">٥ ساڵ</option>
-                                <option value="10">١٠ ساڵ</option>
-                            </select>
+                            <span>ماوەی کارکردن (ساڵ):</span>
+                            <input type="number" id="bcDurationYears" min="1" max="15" step="1" value="5" style="width: 60px;" onchange="saveBirthControl()">
                         </div>
                         <div class="config-row" style="margin-top: 6px;">
                             <span>بەرواری کۆتایی:</span>
@@ -1362,6 +1358,22 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const storedWeightHistory = data.glow_weight_history;
         const storedDailyLogs = data.glow_daily_logs;
         const storedBC = data.glow_birth_control;
+        const storedName = data.glow_display_name;
+
+        // Show the person's name instead of their email once they're
+        // inside the app. Ask for it once (first login) and remember it.
+        if (storedName) {
+            document.getElementById('userEmailDisplay').innerText = storedName;
+            document.getElementById('userAvatar').innerText = storedName.charAt(0).toUpperCase();
+        } else {
+            const enteredName = prompt('ناوت چییە؟ (تەنها یەک جار داوا دەکرێت)');
+            if (enteredName && enteredName.trim()) {
+                const cleanName = enteredName.trim().slice(0, 40);
+                document.getElementById('userEmailDisplay').innerText = cleanName;
+                document.getElementById('userAvatar').innerText = cleanName.charAt(0).toUpperCase();
+                saveUserData({ glow_display_name: cleanName });
+            }
+        }
 
         if(storedStart) {
             activeCycleStart = new Date(storedStart);
@@ -1605,9 +1617,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         list.innerHTML = '';
         dateKeys.forEach(dateKey => {
             const log = dailyLogs[dateKey];
-            const symCount = (log.symptoms || []).length;
-            const label = symCount > 0 ? `${symCount} نیشانە` : 'تۆمارکراوە';
-            list.innerHTML += `<li class="history-item" style="cursor:pointer;" onclick="jumpToLogDate('${dateKey}')"><span>${dateKey}</span><strong>${label}</strong></li>`;
+            const symptoms = log.symptoms || [];
+            let label;
+            if (symptoms.length === 0) {
+                label = 'تۆمارکراوە';
+            } else if (symptoms.length <= 2) {
+                label = symptoms.join('، ');
+            } else {
+                label = `${symptoms.slice(0, 2).join('، ')} +${symptoms.length - 2}`;
+            }
+            list.innerHTML += `<li class="history-item" style="cursor:pointer;" onclick="jumpToLogDate('${dateKey}')"><span>${dateKey}</span><strong>${escapeHTML(label)}</strong></li>`;
         });
     }
 
@@ -1651,23 +1670,28 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     }
 
     function renderBarChartSVG(container, values, labels) {
-        const w = 300, h = 130, padding = 24;
-        const max = Math.max(...values) * 1.15;
-        const min = Math.min(0, Math.min(...values) * 0.9);
+        const w = 300, h = 140, padding = 26;
+        const dataMax = Math.max(...values);
+        const dataMin = Math.min(...values);
+        const spread = (dataMax - dataMin) || 1;
+        // Scale to the data's own range (with a margin), instead of always
+        // starting at 0 — otherwise close values (e.g. 58-62kg) all look
+        // like the same height and the trend is invisible.
+        const max = dataMax + spread * 0.25;
+        const min = dataMin - spread * 0.25;
         const range = (max - min) || 1;
         const gap = (w - padding * 2) / values.length;
-        const barWidth = gap * 0.6;
+        const barWidth = Math.min(gap * 0.6, 40);
 
         let bars = '';
         values.forEach((v, i) => {
-            const barHeight = ((v - min) / range) * (h - padding * 2);
+            const barHeight = Math.max(2, ((v - min) / range) * (h - padding * 2));
             const x = padding + i * gap + (gap - barWidth) / 2;
             const y = h - padding - barHeight;
             bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barHeight.toFixed(1)}" fill="#81b29a" rx="3"></rect>`;
             bars += `<text x="${(x + barWidth / 2).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="9" text-anchor="middle" fill="#2b2d42">${v}</text>`;
-            if (labels && labels[i]) {
-                bars += `<text x="${(x + barWidth / 2).toFixed(1)}" y="${h - 6}" font-size="8" text-anchor="middle" fill="#8d99ae">${labels[i]}</text>`;
-            }
+            const labelText = (labels && labels[i]) ? labels[i] : String(i + 1);
+            bars += `<text x="${(x + barWidth / 2).toFixed(1)}" y="${h - 6}" font-size="8" text-anchor="middle" fill="#8d99ae">${escapeHTML(labelText)}</text>`;
         });
 
         container.innerHTML = `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto;">${bars}</svg>`;
@@ -1684,9 +1708,15 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             .reverse(); // oldest first
 
         const lengths = [];
+        const chartLabels = [];
         for (let i = 1; i < parsedDates.length; i++) {
             const diffDays = Math.round((parsedDates[i] - parsedDates[i - 1]) / 86400000);
-            if (diffDays > 0 && diffDays < 90) lengths.push(diffDays);
+            if (diffDays > 0) {
+                lengths.push(diffDays);
+                // Label each bar with the short date the *next* period
+                // started, so it's clear which cycle each bar represents.
+                chartLabels.push(parsedDates[i].toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            }
         }
 
         if (lengths.length === 0) {
@@ -1695,7 +1725,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             return;
         }
         if (emptyMsg) emptyMsg.style.display = 'none';
-        renderBarChartSVG(container, lengths, null);
+        renderBarChartSVG(container, lengths, chartLabels);
     }
 
     function renderWeightHistoryChart() {
@@ -1710,8 +1740,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             return;
         }
         if (emptyMsg) emptyMsg.style.display = 'none';
-        renderBarChartSVG(container, entries.map(e => e.weight), null);
+        const chartLabels = entries.map(e => new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        renderBarChartSVG(container, entries.map(e => e.weight), chartLabels);
     }
+
 
     function updateBMIBadge(w, h) {
         const bmi = (w / (h * h)).toFixed(1);
@@ -1807,7 +1839,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const type = document.getElementById('bcType').value;
         document.getElementById('bcPillFields').style.display = (type === 'pill') ? 'block' : 'none';
         document.getElementById('bcDeviceFields').style.display = (type === 'iud' || type === 'injection') ? 'block' : 'none';
-        saveBirthControl();
+
+        // For "pill"/"iud"/"injection" wait until the person fills in the
+        // extra field (time / inserted date) before saving, so we don't
+        // write a half-empty record the moment the dropdown changes.
+        if (type === 'none' || type === 'condom') {
+            saveBirthControl();
+        }
     }
 
     function saveBirthControl() {
