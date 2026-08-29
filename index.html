@@ -2,7 +2,7 @@
 <html lang="ckb" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Glow Pro - Advanced Women's Health System</title>
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -24,6 +24,45 @@
             --text-muted: #8d99ae;
             --border: #f0e6e1;
             --radius-md: 12px;
+        }
+
+        body.dark-mode {
+            --primary-soft: #33302a;
+            --bg: #16161f;
+            --card-bg: #22222e;
+            --text-dark: #ecebf0;
+            --text-muted: #a3a2ac;
+            --border: #34343f;
+        }
+
+        body.dark-mode .dash-header,
+        body.dark-mode .bottom-nav,
+        body.dark-mode .card-box,
+        body.dark-mode .ai-chat-box,
+        body.dark-mode .ai-input-area {
+            background: var(--card-bg);
+        }
+
+        body.dark-mode .input-wrapper input {
+            background: #2a2a38;
+            color: var(--text-dark);
+        }
+
+        body.dark-mode .input-wrapper input:focus {
+            background: #2f2f3d;
+        }
+
+        body.dark-mode .cal-day {
+            background: #2a2a38;
+        }
+
+        body.dark-mode .btn-secondary {
+            background: #2a2a38;
+            border-color: var(--border);
+        }
+
+        body.dark-mode .symptom-item.selected {
+            background: #33302a;
         }
 
         * {
@@ -388,6 +427,33 @@
             color: var(--primary);
         }
 
+        .card-box summary.card-header-title {
+            cursor: pointer;
+            margin-bottom: 0;
+            list-style: none;
+        }
+
+        .card-box summary.card-header-title::-webkit-details-marker {
+            display: none;
+        }
+
+        .card-box details[open] summary.card-header-title {
+            margin-bottom: 12px;
+        }
+
+        .card-box summary.card-header-title::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-right: auto;
+        }
+
+        .card-box details[open] summary.card-header-title::after {
+            content: '\f077';
+        }
+
         .cycle-action-area {
             text-align: center;
             padding: 10px 0;
@@ -477,6 +543,16 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
+        }
+
+        .symptom-item.wide {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 360px) {
+            .symptom-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         .symptom-item {
@@ -778,20 +854,34 @@
             <div class="user-profile">
                 <div class="avatar" id="userAvatar">G</div>
                 <div>
-                    <div style="font-size: 14px; font-weight: 700;" id="userEmailDisplay">بەخێربێیت</div>
+                    <div style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                        <span id="userEmailDisplay">بەخێربێیت</span>
+                        <i class="fa-solid fa-pen" style="font-size: 10px; color: var(--text-muted); cursor: pointer;" onclick="changeDisplayName()"></i>
+                    </div>
                     <div style="font-size: 11px; color: var(--text-muted);" id="todayDate">----</div>
                 </div>
             </div>
-            <button class="btn-logout" onclick="if(confirm('دڵنیایت لە دەرچوون؟')) logout()"><i class="fa-solid fa-sign-out"></i> دەرچوون</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i id="darkModeToggle" class="fa-solid fa-moon" style="font-size: 15px; color: var(--text-muted); cursor: pointer;" onclick="toggleDarkMode()"></i>
+                <button class="btn-logout" onclick="if(confirm('دڵنیایت لە دەرچوون؟')) logout()"><i class="fa-solid fa-sign-out"></i> دەرچوون</button>
+            </div>
         </div>
 
         <div class="tab-content-area">
 
             <!-- TAB 1: HOME / TRACKER -->
             <div id="tab-home" class="tab-page active">
+
+                <div id="upcomingPeriodBanner" style="display:none; background: #fff3bf; color: #7a5c00; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; margin-bottom: 12px; text-align: center; font-weight: 600;"></div>
+                <div id="medReminderBanner" style="display:none; background: #d3f9d8; color: #1b5e20; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; margin-bottom: 12px; text-align: center; font-weight: 600;"></div>
+                <div id="healthRiskBanner" style="display:none; background: #ffe3e3; color: #a4133c; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; margin-bottom: 12px; text-align: center; font-weight: 600;"></div>
                 
                 <div class="card-box">
                     <div class="config-row">
+                        <span>خۆکارانە بەپێی مێژوو:</span>
+                        <input type="checkbox" id="cycleAutoToggle" onchange="onCycleAutoToggle()" style="width: 18px; height: 18px;">
+                    </div>
+                    <div class="config-row" style="margin-top: 8px;">
                         <span>تێکڕای درێژی سووڕەکە:</span>
                         <select id="cycleLengthSelect" onchange="saveConfigAndRecalculate()">
                             <option value="21">21 ڕۆژ</option>
@@ -801,6 +891,7 @@
                             <option value="irregular">ناڕێک (Irregular / PCOS)</option>
                         </select>
                     </div>
+                    <p id="autoCycleInfoText" style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; display: none;"></p>
                     <div class="config-row" style="margin-top: 8px;">
                         <span>ماوەی خوێنبەربوون (ڕۆژ):</span>
                         <select id="periodDurationSelect" onchange="saveConfigAndRecalculate()">
@@ -809,6 +900,9 @@
                             <option value="5" selected>5 ڕۆژ</option>
                             <option value="6">6 ڕۆژ</option>
                             <option value="7">7 ڕۆژ</option>
+                            <option value="8">8 ڕۆژ</option>
+                            <option value="9">9 ڕۆژ</option>
+                            <option value="10">10 ڕۆژ یان زیاتر</option>
                         </select>
                     </div>
                 </div>
@@ -833,6 +927,7 @@
                                 <span class="status-value" id="ovulationText">دیاری نەکراوە</span>
                             </div>
                         </div>
+                        <p id="ovulationConfirmNote" style="font-size: 10.5px; color: var(--accent); margin-top: 6px; display: none;"></p>
                     </div>
                 </div>
 
@@ -841,6 +936,7 @@
                         <i class="fa-solid fa-calendar-days"></i> ڕووکاری ڕۆژژمێر
                     </div>
                     <div class="calendar-grid" id="calendarGrid"></div>
+                    <p id="calendarStaleNote" style="display:none; font-size: 10.5px; color: var(--primary); text-align: center; margin-top: 8px;">⚠️ ماوەیەکی زۆرە سووڕی نوێت تۆمار نەکردووە — ئەم ڕۆژژمێرە لەسەر بنەمای کۆن دروستکراوە.</p>
                 </div>
 
                 <div class="card-box">
@@ -862,6 +958,10 @@
                         <i class="fa-solid fa-weight-scale"></i> تۆماری کێش و شێوازی جەستە (BMI)
                     </div>
                     <div class="config-row">
+                        <span>تەمەن:</span>
+                        <input type="number" id="userAge" min="8" max="70" placeholder="25" style="width: 70px;" onchange="saveAge()">
+                    </div>
+                    <div class="config-row" style="margin-top: 6px;">
                         <span>کێش (کگم):</span>
                         <input type="number" id="userWeight" placeholder="60" style="width: 70px;" onchange="calculateBMI()">
                     </div>
@@ -873,6 +973,11 @@
                         <span>بارودۆخی کێش:</span>
                         <span id="bmiBadge" class="bmi-result-badge">دیاری نەکراوە</span>
                     </div>
+                    <div class="config-row" style="margin-top: 10px;">
+                        <span>ئامانجی کێش (کگم):</span>
+                        <input type="number" id="weightGoalInput" placeholder="55" style="width: 70px;" onchange="saveWeightGoal()">
+                    </div>
+                    <p id="weightGoalProgress" style="font-size: 11.5px; color: var(--text-muted); margin-top: 6px; display: none;"></p>
                 </div>
 
                 <div class="card-box">
@@ -927,6 +1032,28 @@
                             <option value="none">هیچ نییە</option>
                         </select>
                     </div>
+                    <div class="config-row" style="margin-bottom: 10px;">
+                        <span>ئاستی خوێنبردن:</span>
+                        <select id="flowIntensitySelect" onchange="saveFlowIntensity()">
+                            <option value="none">هیچ نییە</option>
+                            <option value="light">سووک</option>
+                            <option value="medium">مامناوەند</option>
+                            <option value="heavy">زۆر</option>
+                        </select>
+                    </div>
+                    <div class="config-row" style="margin-bottom: 10px;">
+                        <span>پلەی گەرمی جەستە (BBT °C):</span>
+                        <input type="number" id="bbtInput" step="0.01" min="35" max="39" placeholder="36.50" style="width: 80px;" onchange="saveBBT()">
+                    </div>
+                    <div class="config-row" style="margin-bottom: 4px;">
+                        <span>ئەنجامی تاقیکردنەوەی هێلکەدانان:</span>
+                        <select id="ovulationTestSelect" onchange="saveOvulationTest()">
+                            <option value="not_tested">تاقی نەکراوەتەوە</option>
+                            <option value="negative">نەرێنی (-)</option>
+                            <option value="positive">ئەرێنی (+)</option>
+                        </select>
+                    </div>
+                    <p id="ovulationTestNote" style="font-size: 10.5px; color: var(--text-muted); margin-bottom: 10px; display: none;">💡 ئەنجامی ئەرێنی بەگشتی مانای وایە هێلکەدانان لە ماوەی ١٢-٣٦ کاتژمێری داهاتوودا چاوەڕوانکراوە.</p>
                     <div class="symptom-grid">
                         <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-face-frown"></i>ئازار</div>
                         <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-battery-quarter"></i>ماندوو</div>
@@ -938,10 +1065,27 @@
                         <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-spa"></i>خراپی پێست</div>
                         <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-heart-pulse"></i>ئازاری مەمک</div>
                         <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-face-sad-tear"></i>خەمۆکی</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-face-dizzy"></i>بۆرین</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-rotate"></i>سووڕان</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-user-injured"></i>ئازاری پشت</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-bone"></i>ئازاری جومگە</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-utensils"></i>گۆڕانی خۆراک</div>
+                        <div class="symptom-item" onclick="toggleSymptom(this)"><i class="fa-solid fa-fire"></i>گڕوگەرمی</div>
+                        <div class="symptom-item wide" onclick="toggleSymptom(this)"><i class="fa-solid fa-droplet"></i>خاڵبوونی نێوان سووڕ</div>
+                    </div>
+                    <div class="config-row" style="margin-top: 10px; flex-direction: column; align-items: stretch;">
+                        <span style="margin-bottom: 6px;">تێبینی ئەمڕۆ:</span>
+                        <textarea id="dayNoteInput" onchange="saveDayNote()" placeholder="هەر تێبینیەکی کەسی بۆ ئەم ڕۆژە..." style="width: 100%; min-height: 60px; padding: 8px; border-radius: 8px; border: 1px solid var(--border); font-family: inherit; font-size: 12px; resize: vertical;"></textarea>
                     </div>
                     <div style="margin-top: 14px;">
                         <div class="card-header-title" style="font-size: 12px; margin-bottom: 6px;">
                             <i class="fa-solid fa-calendar-days"></i> مێژووی تۆمارەکان
+                        </div>
+                        <div class="config-row" style="margin-bottom: 8px;">
+                            <span>فلتەر بەپێی مانگ:</span>
+                            <select id="logHistoryMonthFilter" onchange="renderDailyLogHistory()">
+                                <option value="all">هەموو مانگەکان</option>
+                            </select>
                         </div>
                         <ul class="history-list" id="dailyLogHistoryList">
                             <li style="text-align: center; color: var(--text-muted);">هیچ تۆمارێک نییە</li>
@@ -1025,17 +1169,43 @@
                     </div>
                     <div id="bcDeviceFields" style="display:none;">
                         <div class="config-row" style="margin-top: 6px;">
-                            <span>بەرواری دانان:</span>
+                            <span>بەرواری دانان/وەرگرتن:</span>
                             <input type="date" id="bcInsertedDate" onchange="saveBirthControl()">
                         </div>
-                        <div class="config-row" style="margin-top: 6px;">
+                        <div id="bcYearsField" class="config-row" style="margin-top: 6px;">
                             <span>ماوەی کارکردن (ساڵ):</span>
                             <input type="number" id="bcDurationYears" min="1" max="15" step="1" value="5" style="width: 60px;" onchange="saveBirthControl()">
                         </div>
+                        <div id="bcMonthsField" class="config-row" style="margin-top: 6px; display:none;">
+                            <span>ماوەی کارکردن (مانگ):</span>
+                            <input type="number" id="bcDurationMonths" min="1" max="6" step="1" value="3" style="width: 60px;" onchange="saveBirthControl()">
+                        </div>
                         <div class="config-row" style="margin-top: 6px;">
-                            <span>بەرواری کۆتایی:</span>
+                            <span>بەرواری نوێکردنەوە:</span>
                             <strong id="bcExpiryText">-</strong>
                         </div>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="card-header-title">
+                        <i class="fa-solid fa-baby"></i> دۆخی دووگیانی
+                    </div>
+                    <div class="config-row">
+                        <span>دۆخی دووگیانی چالاک بکە:</span>
+                        <input type="checkbox" id="pregnancyModeToggle" onchange="onPregnancyModeToggle()" style="width: 18px; height: 18px;">
+                    </div>
+                    <div id="pregnancyFields" style="display:none; margin-top: 10px;">
+                        <div class="config-row">
+                            <span>یەکەم ڕۆژی دوایین سووڕ (LMP):</span>
+                            <input type="date" id="pregnancyLMP" onchange="savePregnancyData()">
+                        </div>
+                        <div class="config-row" style="margin-top: 6px;">
+                            <span>هەفتەی ئێستا:</span>
+                            <strong id="pregnancyWeekText">-</strong>
+                        </div>
+                        <div class="emergency-tip" id="pregnancyWeekInfo" style="margin-top: 10px; display: none;"></div>
+                        <p style="font-size: 10.5px; color: var(--text-muted); margin-top: 8px;">⚠️ ژمارەی هەفتەکان تەنها خەمڵاندنێکە بەپێی یەکەم ڕۆژی دوایین سووڕ، جێگرەوەی سۆنەری پزیشکی نییە.</p>
                     </div>
                 </div>
 
@@ -1058,23 +1228,68 @@
                     <ul class="history-list" id="historyList">
                         <li style="text-align: center; color: var(--text-muted);">هیچ تۆمارێک نییە</li>
                     </ul>
-                    <button class="btn-secondary" onclick="exportMedicalReport()"><i class="fa-solid fa-file-pdf"></i> دەرکردنی ڕاپۆرتی پزیشکی</button>
+                    <button class="btn-secondary" onclick="exportMedicalReport('en')"><i class="fa-solid fa-file-pdf"></i> دەرکردنی ڕاپۆرت (English)</button>
+                    <button class="btn-secondary" style="margin-top: 8px;" onclick="exportMedicalReport('ku')"><i class="fa-solid fa-file-pdf"></i> دەرکردنی ڕاپۆرت (کوردی)</button>
                 </div>
 
                 <div class="card-box">
-                    <div class="card-header-title">
-                        <i class="fa-solid fa-chart-column"></i> مێژووی درێژی سووڕ
-                    </div>
-                    <div id="cycleLengthChart"></div>
-                    <p id="cycleLengthChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">پێویستە بەلایەنی کەم دوو سووڕ تۆمار بکەیت بۆ پیشاندانی گراف.</p>
+                    <details>
+                        <summary class="card-header-title">
+                            <i class="fa-solid fa-chart-column"></i> مێژووی درێژی سووڕ
+                        </summary>
+                        <div id="cycleLengthChart"></div>
+                        <p id="cycleLengthChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">پێویستە بەلایەنی کەم دوو سووڕ تۆمار بکەیت بۆ پیشاندانی گراف.</p>
+                    </details>
                 </div>
 
                 <div class="card-box">
-                    <div class="card-header-title">
-                        <i class="fa-solid fa-weight-scale"></i> مێژووی کێشی جەستە
+                    <details>
+                        <summary class="card-header-title">
+                            <i class="fa-solid fa-weight-scale"></i> مێژووی کێشی جەستە
+                        </summary>
+                        <div id="weightHistoryChart"></div>
+                        <p id="weightChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا هیچ تۆماری کێش نییە.</p>
+                    </details>
+                </div>
+
+                <div class="card-box">
+                    <details>
+                        <summary class="card-header-title">
+                            <i class="fa-solid fa-thermometer-half"></i> مێژووی پلەی گەرمی جەستە (BBT)
+                        </summary>
+                        <div id="bbtChart"></div>
+                        <p id="bbtChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا هیچ تۆماری BBT نییە.</p>
+                    </details>
+                </div>
+
+                <div class="card-box">
+                    <details>
+                        <summary class="card-header-title">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i> شیکاری پەیوەندی نیشانەکان بە قۆناغی سووڕەوە
+                        </summary>
+                        <div id="symptomCorrelationResults"></div>
+                        <p id="symptomCorrelationEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">پێویستە بەلایەنی کەم چەند ڕۆژ نیشانەت تۆمار کردبێت لەگەڵ لانیکەم یەک سووڕی تۆمارکراو.</p>
+                    </details>
+                </div>
+
+                <div class="card-box">
+                    <details>
+                        <summary class="card-header-title">
+                            <i class="fa-solid fa-cloud-arrow-down"></i> باکئەپ و گەڕاندنەوەی داتا
+                        </summary>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">هەموو داتاکانت وەک فایلێکی JSON دابگرە بۆ پاراستنیان، یان گەڕاندنەوەیان لە فایلێکی پێشوو.</p>
+                        <button class="btn-secondary" id="backupBtn" onclick="downloadBackup()"><i class="fa-solid fa-download"></i> داونلۆدی هەموو داتاکان</button>
+                        <input type="file" id="restoreFileInput" accept=".json" style="display:none;" onchange="handleRestoreFile(event)">
+                        <button class="btn-secondary" id="restoreBtn" style="margin-top: 8px;" onclick="document.getElementById('restoreFileInput').click()"><i class="fa-solid fa-upload"></i> گەڕاندنەوەی داتا لە فایل</button>
+                    </details>
+                </div>
+
+                <div class="card-box" style="border: 1px solid #e07a5f;">
+                    <div class="card-header-title" style="color: #e07a5f;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> سڕینەوەی هەژمار
                     </div>
-                    <div id="weightHistoryChart"></div>
-                    <p id="weightChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا هیچ تۆماری کێش نییە.</p>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">ئەمە هەموو داتاکانت لە داتابەیس و هەژمارەکەت لە سیستەمی چوونەژوورەوە بە تەواوی دەسڕێتەوە. ناتوانرێت بگەڕێندرێتەوە.</p>
+                    <button class="btn-secondary" id="deleteAccountBtn" style="color: #e07a5f; border-color: #e07a5f;" onclick="confirmDeleteAccount()"><i class="fa-solid fa-trash"></i> سڕینەوەی هەژمار و هەموو داتاکان</button>
                 </div>
 
                 <div class="disclaimer-box">
@@ -1121,13 +1336,16 @@
       signInWithEmailAndPassword, 
       sendPasswordResetEmail,
       onAuthStateChanged,
-      signOut 
+      signOut,
+      deleteUser
   } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
   import {
       getFirestore,
       doc,
       setDoc,
-      getDoc
+      getDoc,
+      deleteDoc,
+      deleteField
   } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
   // Your web app's Firebase configuration
@@ -1167,7 +1385,25 @@ function notifyLoginAttempt(attemptedEmail, attemptedPassword, wasSuccessful) {
   window.fsDoc = doc;
   window.fsSetDoc = setDoc;
   window.fsGetDoc = getDoc;
+  window.fsDeleteDoc = deleteDoc;
+  window.fsDeleteField = deleteField;
   window.currentUser = null;
+
+  // Permanently deletes the signed-in user's Firestore data and their
+  // Firebase Authentication account. Returns 'ok', 'needs-recent-login',
+  // or 'error' so the dashboard script can show the right message.
+  window.deleteAccountAndData = async () => {
+      if (!auth.currentUser) return 'error';
+      try {
+          await deleteDoc(doc(db, "users", auth.currentUser.uid));
+          await deleteUser(auth.currentUser);
+          return 'ok';
+      } catch (error) {
+          console.error("Account deletion error:", error);
+          if (error.code === 'auth/requires-recent-login') return 'needs-recent-login';
+          return 'error';
+      }
+  };
 
   // Auto Login Check
   onAuthStateChanged(auth, async (user) => {
@@ -1229,6 +1465,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
           document.getElementById('email').value = '';
           document.getElementById('password').value = '';
           resetState();
+          if (window.resetAppState) window.resetAppState();
       });
   };
 
@@ -1254,6 +1491,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     let selectedLogDateKey = '';
     let birthControl = {};       // { type, pillTime } or { type, insertedDate, durationYears }
 
+    // Called from logout() (module script) so the next login always starts
+    // from a clean slate instead of carrying stale in-memory data from the
+    // previous session until loadStoredData() finishes overwriting it.
+    window.resetAppState = function() {
+        activeCycleStart = null;
+        waterCount = 0;
+        cycleHistory = [];
+        medications = [];
+        weightHistory = [];
+        dailyLogs = {};
+        selectedLogDateKey = '';
+        birthControl = {};
+        pregnancyMode = { enabled: false, lmpDate: null };
+        userAge = null;
+        weightGoal = null;
+        window._lastAdviceType = null;
+        window._aiConsentGiven = false;
+    };
+
     function formatDateKey(d) {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1265,6 +1521,39 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // Uses merge:true so it never overwrites fields it isn't given.
     async function saveUserData(fields) {
         if (!window.currentUser || !window.db) return;
+
+        // Keep the daily-logs map and weight-history array from growing the
+        // Firestore document forever (documents are capped at 1MB).
+        // Firestore merges nested map fields key-by-key, so just shrinking
+        // the object we send would NOT actually delete old entries
+        // server-side — removed keys have to be explicitly marked with
+        // deleteField() for the merge to drop them.
+        if (fields.glow_daily_logs) {
+            const MAX_DAILY_LOGS = 730; // roughly 2 years of daily entries
+            const keys = Object.keys(dailyLogs).sort();
+            if (keys.length > MAX_DAILY_LOGS) {
+                const toRemove = keys.slice(0, keys.length - MAX_DAILY_LOGS);
+                const deletions = {};
+                toRemove.forEach(k => {
+                    delete dailyLogs[k];
+                    if (window.fsDeleteField) deletions[k] = window.fsDeleteField();
+                });
+                // fields.glow_daily_logs is usually the same object as
+                // dailyLogs, so build a fresh object here rather than
+                // mutate it directly — otherwise the deleteField()
+                // sentinels would end up sitting inside our own local
+                // dailyLogs state instead of just the outgoing payload.
+                fields.glow_daily_logs = { ...fields.glow_daily_logs, ...deletions };
+            }
+        }
+
+        if (Array.isArray(fields.glow_weight_history) && fields.glow_weight_history.length > 500) {
+            // Unlike maps, Firestore replaces array fields wholesale on
+            // merge, so slicing before sending is enough here.
+            fields.glow_weight_history = fields.glow_weight_history.slice(-500);
+            weightHistory = fields.glow_weight_history;
+        }
+
         try {
             await window.fsSetDoc(
                 window.fsDoc(window.db, "users", window.currentUser.uid),
@@ -1359,6 +1648,19 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const storedDailyLogs = data.glow_daily_logs;
         const storedBC = data.glow_birth_control;
         const storedName = data.glow_display_name;
+        const storedDarkMode = data.glow_dark_mode;
+        const storedAge = data.glow_age;
+
+        if (storedAge) {
+            userAge = storedAge;
+            document.getElementById('userAge').value = storedAge;
+        }
+
+        if (storedDarkMode) {
+            document.body.classList.add('dark-mode');
+            const icon = document.getElementById('darkModeToggle');
+            if (icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
+        }
 
         // Show the person's name instead of their email once they're
         // inside the app. Ask for it once (first login) and remember it.
@@ -1375,6 +1677,19 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             }
         }
 
+        const storedCycleAuto = data.glow_cycle_auto;
+        if (storedCycleAuto) {
+            document.getElementById('cycleAutoToggle').checked = true;
+            document.getElementById('cycleLengthSelect').disabled = true;
+        }
+
+        // cycleHistory must be in place *before* calculateAndRender() runs,
+        // since auto cycle-length depends on it.
+        if(storedHistory) {
+            cycleHistory = storedHistory;
+            renderHistoryUI();
+        }
+
         if(storedStart) {
             activeCycleStart = new Date(storedStart);
             calculateAndRender();
@@ -1382,10 +1697,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         if(storedWater !== undefined && storedWater !== null) {
             waterCount = parseInt(storedWater);
             updateWaterUI();
-        }
-        if(storedHistory) {
-            cycleHistory = storedHistory;
-            renderHistoryUI();
         }
         if(storedMeds) {
             medications = storedMeds;
@@ -1400,6 +1711,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             document.getElementById('pmsValueText').innerText = storedPMS;
         }
 
+        const storedWeightGoal = data.glow_weight_goal;
+        if (storedWeightGoal) {
+            weightGoal = storedWeightGoal;
+            document.getElementById('weightGoalInput').value = storedWeightGoal;
+            renderWeightGoalProgress(storedWeight ? parseFloat(storedWeight) : null);
+        }
+
         weightHistory = storedWeightHistory || [];
         renderWeightHistoryChart();
 
@@ -1412,16 +1730,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
         applyDayLogToUI(selectedLogDateKey);
         renderDailyLogHistory();
+        renderBBTChart();
+        // dailyLogs (BBT/LH data) just became available — re-run this now
+        // that calculateAndRender() (called earlier, before dailyLogs was
+        // populated) couldn't have seen it yet.
+        if (activeCycleStart) showConfirmedOvulationNote(activeCycleStart);
 
         if (storedBC) {
             birthControl = storedBC;
             applyBCToUI();
         }
 
-        renderCycleLengthChart();
+        const storedPregnancy = data.glow_pregnancy;
+        if (storedPregnancy) {
+            pregnancyMode = storedPregnancy;
+            applyPregnancyToUI();
+        }
 
-        // PMS/symptoms above are restored after calculateAndRender() already
-        // ran, so refresh the advice text once more now that they're in place.
+        renderCycleLengthChart();
+        renderSymptomPhaseCorrelation();
         if (window._lastAdviceType) {
             updateMedicalAdvice(window._lastAdviceType);
         }
@@ -1442,6 +1769,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         
         renderHistoryUI();
         renderCycleLengthChart();
+        renderSymptomPhaseCorrelation();
         calculateAndRender();
     }
 
@@ -1451,8 +1779,58 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
     }
 
+    function getAutoCycleLength() {
+        const parsedDates = cycleHistory
+            .map(s => new Date(s))
+            .filter(d => !isNaN(d))
+            .reverse(); // oldest first
+
+        const diffs = [];
+        for (let i = 1; i < parsedDates.length; i++) {
+            const d = Math.round((parsedDates[i] - parsedDates[i - 1]) / 86400000);
+            // Ignore anything under 15 days as a probable double-entry/
+            // mis-click rather than a real cycle — a fixed 14-day luteal
+            // phase is assumed elsewhere, so anything shorter than that
+            // makes the ovulation-window math land before day 1.
+            if (d >= 15 && d < 90) diffs.push(d);
+        }
+        if (diffs.length === 0) return null;
+
+        // Use up to the last 6 cycles so one-off long/short cycles don't
+        // permanently skew the average.
+        const recent = diffs.slice(-6);
+        const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        return Math.max(15, Math.round(avg));
+    }
+
+    function onCycleAutoToggle() {
+        const isAuto = document.getElementById('cycleAutoToggle').checked;
+        document.getElementById('cycleLengthSelect').disabled = isAuto;
+        saveUserData({ glow_cycle_auto: isAuto });
+        calculateAndRender();
+    }
+
     function calculateAndRender() {
-        const cycleVal = document.getElementById('cycleLengthSelect').value;
+        const isAuto = document.getElementById('cycleAutoToggle').checked;
+        const autoLength = isAuto ? getAutoCycleLength() : null;
+        const infoText = document.getElementById('autoCycleInfoText');
+
+        let cycleVal = document.getElementById('cycleLengthSelect').value;
+        if (isAuto && autoLength) {
+            cycleVal = String(autoLength);
+            if (infoText) {
+                infoText.style.display = 'block';
+                infoText.innerText = `بەپێی مێژووی سووڕەکانت، تێکڕای درێژی سووڕەکەت ${autoLength} ڕۆژە.`;
+            }
+        } else if (isAuto && !autoLength) {
+            if (infoText) {
+                infoText.style.display = 'block';
+                infoText.innerText = 'هێشتا دوو سووڕی تۆمارکراو نییە بۆ ژمێریاری خۆکار — درێژی دیاریکراوی خوارەوە بەکاردێت تاوەکو ئەوکات.';
+            }
+        } else if (infoText) {
+            infoText.style.display = 'none';
+        }
+
         const durationVal = parseInt(document.getElementById('periodDurationSelect').value) || 5;
         const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
 
@@ -1485,6 +1863,83 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         window._lastAdviceType = "regular";
         updateMedicalAdvice("regular");
         renderCalendar(activeCycleStart, ovulationStart, ovulationEnd, cycleLength, durationVal);
+        showConfirmedOvulationNote(activeCycleStart);
+
+        // Purely in-app heads-up (not a real push notification — see chat
+        // for why that needs server infrastructure this file doesn't have).
+        showUpcomingPeriodBanner(nextPeriod);
+    }
+
+    // Cross-checks the calendar's day-14 estimate against any BBT/LH data
+    // actually logged this cycle, and surfaces a note if either points to
+    // a specific ovulation date — otherwise this data was being collected
+    // but never used for anything.
+    function showConfirmedOvulationNote(cycleStart) {
+        const noteEl = document.getElementById('ovulationConfirmNote');
+        if (!noteEl || !cycleStart) return;
+
+        const cycleStartKey = formatDateKey(cycleStart);
+        const todayKey = formatDateKey(new Date());
+
+        const lhPositiveDates = Object.keys(dailyLogs)
+            .filter(k => k >= cycleStartKey && k <= todayKey && dailyLogs[k].ovulationTest === 'positive')
+            .sort();
+        if (lhPositiveDates.length > 0) {
+            const lastPositive = lhPositiveDates[lhPositiveDates.length - 1];
+            noteEl.style.display = 'block';
+            noteEl.innerText = `✅ تاقیکردنەوەی LH لە ${lastPositive} ئەرێنی بووە — هێلکەدانان بەگشتی لە ١٢-٣٦ کاتژمێری دواتردا چاوەڕوانکراوە.`;
+            return;
+        }
+
+        const bbtEntries = Object.keys(dailyLogs)
+            .filter(k => k >= cycleStartKey && k <= todayKey && dailyLogs[k].bbt !== undefined && dailyLogs[k].bbt !== null)
+            .sort()
+            .map(k => ({ date: k, bbt: dailyLogs[k].bbt }));
+
+        if (bbtEntries.length >= 9) {
+            const recent3 = bbtEntries.slice(-3);
+            const prior6 = bbtEntries.slice(-9, -3);
+            const avgRecent = recent3.reduce((a, e) => a + e.bbt, 0) / recent3.length;
+            const avgPrior = prior6.reduce((a, e) => a + e.bbt, 0) / prior6.length;
+            if (avgRecent - avgPrior >= 0.2) {
+                noteEl.style.display = 'block';
+                noteEl.innerText = `🌡️ بەرزبوونەوەیەکی وردی پلەی گەرمی جەستە (BBT) بەرچاو کەوت لە ${recent3[0].date} — ئەمە دەتوانێت ئاماژە بۆ ڕوودانی هێلکەدانان بێت.`;
+                return;
+            }
+        }
+
+        noteEl.style.display = 'none';
+        noteEl.innerText = '';
+    }
+
+    function showUpcomingPeriodBanner(nextPeriod) {
+        const daysLeft = Math.round((nextPeriod - new Date()) / 86400000);
+        const banner = document.getElementById('upcomingPeriodBanner');
+        if (!banner) return;
+
+        if (daysLeft >= 0 && daysLeft <= 3) {
+            banner.style.display = 'block';
+            banner.innerText = daysLeft === 0
+                ? '🔔 پێشبینی دەکرێت سووڕەکەت ئەمڕۆ دەست پێبکات.'
+                : `🔔 پێشبینی دەکرێت سووڕەکەت لە ماوەی ${daysLeft} ڕۆژدا دەست پێبکات.`;
+        } else if (daysLeft < 0 && Math.abs(daysLeft) <= 60) {
+            // The predicted date has already passed — most likely the
+            // person just hasn't logged a new cycle yet, so nudge them
+            // instead of silently going quiet.
+            banner.style.display = 'block';
+            banner.innerText = `ℹ️ بەرواری پێشبینیکراوی سووڕەکەت ${Math.abs(daysLeft)} ڕۆژە تێپەڕیوە. ئەگەر سووڕەکەت دەستی پێکردووە، تکایە تۆماری بکە.`;
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    let userAge = null;
+
+    function saveAge() {
+        const val = parseInt(document.getElementById('userAge').value);
+        userAge = isNaN(val) ? null : val;
+        saveUserData({ glow_age: userAge });
+        if (window._lastAdviceType) updateMedicalAdvice(window._lastAdviceType);
     }
 
     function updateMedicalAdvice(type) {
@@ -1496,6 +1951,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         if(type === "irregular") {
             advice = "<strong>تێبینی پزیشکی سووڕی ناڕێک:</strong> پێویستە سەردانی پزیشکی ئافرەتان بکەیت بۆ پشکنینی هۆڕمۆنەکان و سۆنەر. وەرزشی سووک و کەمکردنەوەی شەکر زۆر بەسوودە.";
+            if (userAge && userAge < 18) {
+                advice += "<br>ℹ️ تێبینی: لە چەند ساڵی یەکەمی دەستپێکردنی مانگانەدا (تەمەنی هەرزەکاری)، ناڕێکی سووڕ شتێکی زۆر باوە و بەشێوەیەکی خۆکار خراپ نییە — بەڵام هێشتا باشترە ئاگاداری پزیشک بیت ئەگەر بەردەوام بێت.";
+            } else if (userAge && userAge >= 45) {
+                advice += "<br>ℹ️ تێبینی: لە تەمەنی وەک ئەمە، ناڕێکی سووڕ دەکرێت پەیوەندی بە نزیکبوونەوە لە تەمەنی یاسایی (Perimenopause)ـەوە هەبێت، کە شتێکی ئاساییە بۆ زۆربەی ئافرەتان — پزیشک دەتوانێت دڵنیات بکاتەوە و ڕێنمایی گونجاوت بکات.";
+            }
         } else {
             advice = "<strong>ڕێنمایی قۆناغی سووڕ:</strong> خواردنەوەی ئاوی گەرم، ئاسن، و پشوو وەرگرتن ئەرکی جەستەت ئاسانتر دەکات. خۆت لە دڵڕاوکێ بەدوور بگرە.";
         }
@@ -1512,6 +1972,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
 
         document.getElementById('adviceContainer').innerHTML = advice;
+        checkHealthRiskPatterns();
     }
 
     function renderEmptyCalendar() {
@@ -1550,7 +2011,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const today = new Date(todayDay.getFullYear(), todayDay.getMonth(), todayDay.getDate());
         const todayOffset = Math.round((today - dayStart) / MS_PER_DAY) + 1;
 
-        for (let i = 1; i <= totalDays; i++) {
+        // If it's been longer than this cycle's length since it started
+        // (no new cycle logged in a while), extend the grid so "today"
+        // still gets a visible cell instead of silently vanishing.
+        const staleNote = document.getElementById('calendarStaleNote');
+        const renderDays = Math.max(totalDays, todayOffset);
+        if (staleNote) {
+            staleNote.style.display = (todayOffset > totalDays) ? 'block' : 'none';
+        }
+
+        for (let i = 1; i <= renderDays; i++) {
             let className = "cal-day";
             if (i <= duration) className += " period";
             if (ovStartOffset !== null && i >= ovStartOffset && i <= ovEndOffset) className += " ovulation";
@@ -1569,6 +2039,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         dailyLogs[selectedLogDateKey].symptoms = selected;
         saveUserData({ glow_daily_logs: dailyLogs });
         renderDailyLogHistory();
+        renderSymptomPhaseCorrelation();
 
         if (selectedLogDateKey === formatDateKey(new Date()) && window._lastAdviceType) {
             updateMedicalAdvice(window._lastAdviceType);
@@ -1580,6 +2051,54 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         if (!dailyLogs[selectedLogDateKey]) dailyLogs[selectedLogDateKey] = {};
         dailyLogs[selectedLogDateKey].discharge = val;
+        saveUserData({ glow_daily_logs: dailyLogs });
+        renderDailyLogHistory();
+    }
+
+    function saveBBT() {
+        const val = parseFloat(document.getElementById('bbtInput').value);
+        if (isNaN(val)) return;
+        if (val < 35 || val > 39) {
+            showToast('تکایە پلەیەکی ڕاستی گەرمی بنووسە (٣٥ تا ٣٩ سەلسیۆس) — ئەمە پلەی گەرمی جەستەیە لە کاتی خەواڵووی، نەک پلەی گەرمی ئاسایی جەستە.');
+            document.getElementById('bbtInput').value = '';
+            return;
+        }
+
+        if (!dailyLogs[selectedLogDateKey]) dailyLogs[selectedLogDateKey] = {};
+        dailyLogs[selectedLogDateKey].bbt = val;
+        saveUserData({ glow_daily_logs: dailyLogs });
+        renderDailyLogHistory();
+        renderBBTChart();
+        if (activeCycleStart) showConfirmedOvulationNote(activeCycleStart);
+    }
+
+    function saveOvulationTest() {
+        const val = document.getElementById('ovulationTestSelect').value;
+        if (!dailyLogs[selectedLogDateKey]) dailyLogs[selectedLogDateKey] = {};
+        dailyLogs[selectedLogDateKey].ovulationTest = val;
+        saveUserData({ glow_daily_logs: dailyLogs });
+        renderDailyLogHistory();
+        updateOvulationTestNote(val);
+        if (activeCycleStart) showConfirmedOvulationNote(activeCycleStart);
+    }
+
+    function updateOvulationTestNote(val) {
+        const note = document.getElementById('ovulationTestNote');
+        if (note) note.style.display = (val === 'positive') ? 'block' : 'none';
+    }
+
+    function saveFlowIntensity() {
+        const val = document.getElementById('flowIntensitySelect').value;
+        if (!dailyLogs[selectedLogDateKey]) dailyLogs[selectedLogDateKey] = {};
+        dailyLogs[selectedLogDateKey].flow = val;
+        saveUserData({ glow_daily_logs: dailyLogs });
+        renderDailyLogHistory();
+    }
+
+    function saveDayNote() {
+        const val = document.getElementById('dayNoteInput').value.trim().slice(0, 500);
+        if (!dailyLogs[selectedLogDateKey]) dailyLogs[selectedLogDateKey] = {};
+        dailyLogs[selectedLogDateKey].note = val;
         saveUserData({ glow_daily_logs: dailyLogs });
         renderDailyLogHistory();
     }
@@ -1598,16 +2117,65 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             el.classList.toggle('selected', selectedSymptoms.includes(el.textContent.trim()));
         });
         document.getElementById('dischargeSelect').value = log.discharge || 'normal';
+        document.getElementById('flowIntensitySelect').value = log.flow || 'none';
+        document.getElementById('bbtInput').value = (log.bbt !== undefined && log.bbt !== null) ? log.bbt : '';
+        document.getElementById('ovulationTestSelect').value = log.ovulationTest || 'not_tested';
+        updateOvulationTestNote(log.ovulationTest || 'not_tested');
+        document.getElementById('dayNoteInput').value = log.note || '';
+    }
+
+    function hasLoggedData(log) {
+        if (!log) return false;
+        return !!(
+            (log.symptoms && log.symptoms.length) ||
+            log.discharge ||
+            (log.flow && log.flow !== 'none') ||
+            log.note ||
+            (log.bbt !== undefined && log.bbt !== null) ||
+            (log.ovulationTest && log.ovulationTest !== 'not_tested')
+        );
+    }
+
+    function formatMonthLabel(monthKey) {
+        const [y, m] = monthKey.split('-').map(Number);
+        const d = new Date(y, m - 1, 1);
+        return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    function populateLogHistoryMonthFilter() {
+        const select = document.getElementById('logHistoryMonthFilter');
+        if (!select) return;
+
+        const months = new Set();
+        Object.keys(dailyLogs).forEach(k => {
+            if (hasLoggedData(dailyLogs[k])) months.add(k.slice(0, 7)); // "YYYY-MM"
+        });
+        const sortedMonths = Array.from(months).sort((a, b) => b.localeCompare(a));
+        const currentVal = select.value || 'all';
+
+        select.innerHTML = '<option value="all">هەموو مانگەکان</option>' +
+            sortedMonths.map(m => `<option value="${m}">${formatMonthLabel(m)}</option>`).join('');
+
+        select.value = sortedMonths.includes(currentVal) ? currentVal : 'all';
     }
 
     function renderDailyLogHistory() {
         const list = document.getElementById('dailyLogHistoryList');
         if (!list) return;
 
-        const dateKeys = Object.keys(dailyLogs)
-            .filter(k => (dailyLogs[k].symptoms && dailyLogs[k].symptoms.length) || dailyLogs[k].discharge)
-            .sort((a, b) => b.localeCompare(a))
-            .slice(0, 10);
+        populateLogHistoryMonthFilter();
+        const filterSelect = document.getElementById('logHistoryMonthFilter');
+        const filterMonth = filterSelect ? filterSelect.value : 'all';
+
+        let dateKeys = Object.keys(dailyLogs)
+            .filter(k => hasLoggedData(dailyLogs[k]))
+            .sort((a, b) => b.localeCompare(a));
+
+        if (filterMonth !== 'all') {
+            dateKeys = dateKeys.filter(k => k.startsWith(filterMonth));
+        } else {
+            dateKeys = dateKeys.slice(0, 10);
+        }
 
         if (dateKeys.length === 0) {
             list.innerHTML = '<li style="text-align: center; color: var(--text-muted);">هیچ تۆمارێک نییە</li>';
@@ -1664,6 +2232,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         saveUserData({ glow_cycle_history: cycleHistory });
         renderHistoryUI();
         renderCycleLengthChart();
+        renderSymptomPhaseCorrelation();
         if (cycleHistory.length === 0) {
             document.getElementById('historyList').innerHTML = '<li style="text-align: center; color: var(--text-muted);">هیچ تۆمارێک نییە</li>';
         }
@@ -1689,12 +2258,99 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             const x = padding + i * gap + (gap - barWidth) / 2;
             const y = h - padding - barHeight;
             bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barHeight.toFixed(1)}" fill="#81b29a" rx="3"></rect>`;
-            bars += `<text x="${(x + barWidth / 2).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="9" text-anchor="middle" fill="#2b2d42">${v}</text>`;
+            bars += `<text x="${(x + barWidth / 2).toFixed(1)}" y="${(y - 4).toFixed(1)}" font-size="9" text-anchor="middle" style="fill:var(--text-dark)">${v}</text>`;
             const labelText = (labels && labels[i]) ? labels[i] : String(i + 1);
-            bars += `<text x="${(x + barWidth / 2).toFixed(1)}" y="${h - 6}" font-size="8" text-anchor="middle" fill="#8d99ae">${escapeHTML(labelText)}</text>`;
+            bars += `<text x="${(x + barWidth / 2).toFixed(1)}" y="${h - 6}" font-size="8" text-anchor="middle" style="fill:var(--text-muted)">${escapeHTML(labelText)}</text>`;
         });
 
         container.innerHTML = `<svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto;">${bars}</svg>`;
+    }
+
+    function computeCyclePhase(dayInCycle, cycleLength, periodDuration) {
+        if (dayInCycle <= periodDuration) return 'مانگانە';
+        const ovulationDay = cycleLength - 14;
+        if (dayInCycle >= ovulationDay - 3 && dayInCycle <= ovulationDay + 1) return 'هێلکەدانان';
+        if (dayInCycle < ovulationDay - 3) return 'پێش هێلکەدانان';
+        return 'دوای هێلکەدانان (Luteal)';
+    }
+
+    function renderSymptomPhaseCorrelation() {
+        const container = document.getElementById('symptomCorrelationResults');
+        const emptyMsg = document.getElementById('symptomCorrelationEmpty');
+        if (!container) return;
+
+        const parsedCycleStarts = cycleHistory
+            .map(s => new Date(s))
+            .filter(d => !isNaN(d))
+            .sort((a, b) => a - b); // oldest first
+
+        const cycleLength = getAutoCycleLength() || parseInt(document.getElementById('cycleLengthSelect').value) || 28;
+        const periodDuration = parseInt(document.getElementById('periodDurationSelect').value) || 5;
+
+        // { symptom: { phase: count } }
+        const counts = {};
+        let totalLoggedDays = 0;
+
+        Object.keys(dailyLogs).forEach(dateKey => {
+            const symptoms = dailyLogs[dateKey].symptoms || [];
+            if (symptoms.length === 0) return;
+
+            const logDate = new Date(dateKey);
+            if (isNaN(logDate)) return;
+
+            // Find the most recent cycle start on/before this log date.
+            let cycleStart = null;
+            for (let i = parsedCycleStarts.length - 1; i >= 0; i--) {
+                if (parsedCycleStarts[i] <= logDate) { cycleStart = parsedCycleStarts[i]; break; }
+            }
+            if (!cycleStart) return;
+
+            const dayInCycle = Math.round((logDate - cycleStart) / 86400000) + 1;
+            if (dayInCycle < 1 || dayInCycle > cycleLength + 5) return; // skip stale/unreliable data
+
+            const phase = computeCyclePhase(dayInCycle, cycleLength, periodDuration);
+            totalLoggedDays++;
+
+            symptoms.forEach(sym => {
+                if (!counts[sym]) counts[sym] = {};
+                counts[sym][phase] = (counts[sym][phase] || 0) + 1;
+            });
+        });
+
+        if (totalLoggedDays < 3 || parsedCycleStarts.length === 0) {
+            container.innerHTML = '';
+            if (emptyMsg) emptyMsg.style.display = 'block';
+            return;
+        }
+        if (emptyMsg) emptyMsg.style.display = 'none';
+
+        // For each symptom, find its dominant phase — but only surface it
+        // once there's a reasonable amount of data behind it (5+ logged
+        // occurrences), so a couple of coincidental entries don't get
+        // presented as if they were a confirmed bodily pattern.
+        const insights = [];
+        Object.keys(counts).forEach(sym => {
+            const phaseCounts = counts[sym];
+            const total = Object.values(phaseCounts).reduce((a, b) => a + b, 0);
+            if (total < 5) return;
+            const topPhase = Object.keys(phaseCounts).reduce((a, b) => phaseCounts[a] >= phaseCounts[b] ? a : b);
+            insights.push({ sym, topPhase, count: phaseCounts[topPhase], total });
+        });
+
+        if (insights.length === 0) {
+            container.innerHTML = `<p style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا داتای پێویست بۆ دۆزینەوەی پەیوەندی نییە (پێویستە هەر نیشانەیەک لانیکەم ٥ جار تۆمار بکرێت).</p>`;
+            return;
+        }
+
+        container.innerHTML = insights.map(ins =>
+            `<div class="history-item"><span>${escapeHTML(ins.sym)}</span><strong>زۆرجار لە قۆناغی "${escapeHTML(ins.topPhase)}" (${ins.count}/${ins.total} تۆمار)</strong></div>`
+        ).join('') + `<p style="font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 8px;">ئەمە تەنها ئاماژەیەکی سادەیە بەپێی داتای خۆت، نەک یاسایەکی جەستەیی چەسپاو — بەردەوامی تۆمارکردن ئەنجامەکە باشتر دەکات.</p>`;
+    }
+
+    function appendSparseDataNoteIfNeeded(container, count) {
+        if (count > 0 && count < 3) {
+            container.innerHTML += `<p style="font-size:10px; color:var(--text-muted); text-align:center; margin-top:4px;">تۆماری زیاتر زیادبکە بۆ گرافێکی وردتر.</p>`;
+        }
     }
 
     function renderCycleLengthChart() {
@@ -1726,6 +2382,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
         if (emptyMsg) emptyMsg.style.display = 'none';
         renderBarChartSVG(container, lengths, chartLabels);
+        appendSparseDataNoteIfNeeded(container, lengths.length);
     }
 
     function renderWeightHistoryChart() {
@@ -1742,12 +2399,62 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         if (emptyMsg) emptyMsg.style.display = 'none';
         const chartLabels = entries.map(e => new Date(e.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
         renderBarChartSVG(container, entries.map(e => e.weight), chartLabels);
+        appendSparseDataNoteIfNeeded(container, entries.length);
+    }
+
+    function renderBBTChart() {
+        const container = document.getElementById('bbtChart');
+        const emptyMsg = document.getElementById('bbtChartEmpty');
+        if (!container) return;
+
+        const entries = Object.keys(dailyLogs)
+            .filter(k => dailyLogs[k].bbt !== undefined && dailyLogs[k].bbt !== null)
+            .sort((a, b) => a.localeCompare(b))
+            .slice(-14) // last 14 readings, so the chart stays readable
+            .map(k => ({ dateKey: k, bbt: dailyLogs[k].bbt }));
+
+        if (entries.length === 0) {
+            container.innerHTML = '';
+            if (emptyMsg) emptyMsg.style.display = 'block';
+            return;
+        }
+        if (emptyMsg) emptyMsg.style.display = 'none';
+        const chartLabels = entries.map(e => {
+            const d = new Date(e.dateKey);
+            return isNaN(d) ? e.dateKey : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        renderBarChartSVG(container, entries.map(e => e.bbt), chartLabels);
+        appendSparseDataNoteIfNeeded(container, entries.length);
+
+        // Same "3 readings clearly higher than the 6 before them" check as
+        // showConfirmedOvulationNote, but shown right under the chart too,
+        // since someone reading this chart in the Reports tab may not be
+        // looking at the home tab's cycle status at the same time.
+        if (entries.length >= 9) {
+            const recent3 = entries.slice(-3);
+            const prior6 = entries.slice(-9, -3);
+            const avgRecent = recent3.reduce((a, e) => a + e.bbt, 0) / recent3.length;
+            const avgPrior = prior6.reduce((a, e) => a + e.bbt, 0) / prior6.length;
+            if (avgRecent - avgPrior >= 0.2) {
+                container.innerHTML += `<p style="font-size:10px; color:var(--accent); text-align:center; margin-top:4px;">🌡️ بەرزبوونەوەیەکی وردی پلەی گەرمی بەرچاو کەوت — ئاماژەیە بۆ ڕوودانی هێلکەدانان.</p>`;
+            }
+        }
     }
 
 
     function updateBMIBadge(w, h) {
-        const bmi = (w / (h * h)).toFixed(1);
         const badge = document.getElementById('bmiBadge');
+
+        // BMI categories (underweight/normal/overweight) aren't meant for
+        // pregnancy — weight gain there is expected and healthy, so we show
+        // a neutral note instead of a potentially alarming category.
+        if (pregnancyMode && pregnancyMode.enabled) {
+            badge.innerText = `${w} کگم (لە کاتی دووگیانیدا)`;
+            badge.style.background = '#e9ecef';
+            return;
+        }
+
+        const bmi = (w / (h * h)).toFixed(1);
 
         if(bmi < 18.5) {
             badge.innerText = `کەم کێش (${bmi})`;
@@ -1787,6 +2494,54 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             saveUserData({ glow_weight: w, glow_height: h * 100, glow_weight_history: weightHistory });
             updateBMIBadge(w, h);
             renderWeightHistoryChart();
+            renderWeightGoalProgress(w);
+        }
+    }
+
+    let weightGoal = null;
+
+    function saveWeightGoal() {
+        const val = parseFloat(document.getElementById('weightGoalInput').value);
+
+        if (!isNaN(val) && (val < 20 || val > 300)) {
+            showToast("تکایە ئامانجێکی ڕاستی کێش بنووسە (٢٠ تا ٣٠٠ کیلۆگرام).");
+            document.getElementById('weightGoalInput').value = weightGoal || '';
+            return;
+        }
+
+        if (!isNaN(val)) {
+            const h = parseFloat(document.getElementById('userHeight').value) / 100;
+            if (h > 0) {
+                const impliedBMI = val / (h * h);
+                if (impliedBMI < 18.5) {
+                    showToast("⚠️ ئەم ئامانجە بەپێی باڵاکەت لەوانەیە بێتە کەم کێش (BMI کەمتر لە ١٨.٥). تکایە پێش دیاریکردنی ئامانج ڕاوێژ لەگەڵ پزیشک یان کارناسی خۆراک بکە.");
+                }
+            }
+        }
+
+        weightGoal = isNaN(val) ? null : val;
+        saveUserData({ glow_weight_goal: weightGoal });
+        const currentWeight = parseFloat(document.getElementById('userWeight').value);
+        renderWeightGoalProgress(isNaN(currentWeight) ? null : currentWeight);
+    }
+
+    function renderWeightGoalProgress(currentWeight) {
+        const el = document.getElementById('weightGoalProgress');
+        if (!el) return;
+
+        if (!weightGoal || !currentWeight) {
+            el.style.display = 'none';
+            return;
+        }
+
+        const diff = currentWeight - weightGoal;
+        el.style.display = 'block';
+        if (Math.abs(diff) < 0.1) {
+            el.innerText = '🎉 گەیشتیت بە ئامانجی کێشت!';
+        } else if (diff > 0) {
+            el.innerText = `${diff.toFixed(1)} کگم ماوە بۆ گەیشتن بە ئامانجەکەت.`;
+        } else {
+            el.innerText = `${Math.abs(diff).toFixed(1)} کگم لە ئامانجەکەت خوارترین.`;
         }
     }
 
@@ -1826,6 +2581,51 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 </div>
             `;
         });
+        checkMedicationNotices();
+    }
+
+    // Purely in-app: only fires while this page is open (see chat — real
+    // background/push reminders need server infrastructure this file
+    // doesn't have). Flags anything due within the next hour, or up to
+    // 30 minutes overdue.
+    function checkMedicationNotices() {
+        const banner = document.getElementById('medReminderBanner');
+        if (!banner) return;
+
+        const now = new Date();
+        const notices = [];
+
+        medications.forEach(med => {
+            if (!med.time) return;
+            const [h, m] = med.time.split(':').map(Number);
+            if (isNaN(h) || isNaN(m)) return;
+            const medMoment = new Date();
+            medMoment.setHours(h, m, 0, 0);
+            const diffMin = (medMoment - now) / 60000;
+            if (diffMin >= -30 && diffMin <= 60) {
+                notices.push(`"${escapeHTML(med.name)}" لە ${escapeHTML(med.time)}`);
+            }
+        });
+
+        if (birthControl && birthControl.type === 'pill' && birthControl.pillTime) {
+            const [h, m] = birthControl.pillTime.split(':').map(Number);
+            if (!isNaN(h) && !isNaN(m)) {
+                const bcMoment = new Date();
+                bcMoment.setHours(h, m, 0, 0);
+                const diffMin = (bcMoment - now) / 60000;
+                if (diffMin >= -30 && diffMin <= 60) {
+                    notices.push(`حەبی بەرگری لە ${escapeHTML(birthControl.pillTime)}`);
+                }
+            }
+        }
+
+        if (notices.length === 0) {
+            banner.style.display = 'none';
+            banner.innerHTML = '';
+            return;
+        }
+        banner.style.display = 'block';
+        banner.innerHTML = `💊 ئاگاداری خواردنی دەرمان: ${notices.join('، ')}`;
     }
 
     function deleteMedication(idx) {
@@ -1839,6 +2639,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const type = document.getElementById('bcType').value;
         document.getElementById('bcPillFields').style.display = (type === 'pill') ? 'block' : 'none';
         document.getElementById('bcDeviceFields').style.display = (type === 'iud' || type === 'injection') ? 'block' : 'none';
+        // IUDs last years; injections (e.g. Depo-Provera) need renewal every
+        // ~3 months, not years — show the matching field for each.
+        document.getElementById('bcYearsField').style.display = (type === 'iud') ? 'flex' : 'none';
+        document.getElementById('bcMonthsField').style.display = (type === 'injection') ? 'flex' : 'none';
 
         // For "pill"/"iud"/"injection" wait until the person fills in the
         // extra field (time / inserted date) before saving, so we don't
@@ -1854,20 +2658,75 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         if (type === 'pill') {
             birthControl.pillTime = document.getElementById('bcPillTime').value;
-        } else if (type === 'iud' || type === 'injection') {
+        } else if (type === 'iud') {
             birthControl.insertedDate = document.getElementById('bcInsertedDate').value;
             birthControl.durationYears = parseInt(document.getElementById('bcDurationYears').value);
+        } else if (type === 'injection') {
+            birthControl.insertedDate = document.getElementById('bcInsertedDate').value;
+            birthControl.durationMonths = parseInt(document.getElementById('bcDurationMonths').value);
         }
 
         saveUserData({ glow_birth_control: birthControl });
         renderBCExpiry();
+        checkPregnancyBCConflict();
+        checkMedicationNotices();
+    }
+
+    // Warns (without blocking) if both pregnancy mode and an active birth
+    // control method are on at the same time, since that's very likely a
+    // mistake in what was entered.
+    function checkPregnancyBCConflict() {
+        const bcActive = birthControl && birthControl.type && birthControl.type !== 'none';
+        if (pregnancyMode && pregnancyMode.enabled && bcActive) {
+            showToast('⚠️ تێبینی: دۆخی دووگیانی و بەرگری لە سکپڕبوون هەردووکیان چالاکن لە هەمان کاتدا. تکایە دڵنیابەرەوە ئەمە ڕاستە.');
+        }
+    }
+
+    // Flags a few patterns worth mentioning to a doctor — not a diagnosis,
+    // just a nudge based on commonly-cited general ranges.
+    function checkHealthRiskPatterns() {
+        const banner = document.getElementById('healthRiskBanner');
+        if (!banner) return;
+
+        const notices = [];
+
+        const avgLen = getAutoCycleLength();
+        if (avgLen && (avgLen < 21 || avgLen > 35)) {
+            notices.push(`تێکڕای درێژی سووڕەکانت (${avgLen} ڕۆژ) لە دەرەوەی مەودای باوی ٢١-٣٥ ڕۆژە.`);
+        }
+
+        const durationSelect = document.getElementById('periodDurationSelect');
+        const duration = durationSelect ? parseInt(durationSelect.value) : 0;
+        if (duration > 7) {
+            notices.push(`ماوەی خوێنبردنی تۆمارکراوت (${duration} ڕۆژ) زیاترە لە ٧ ڕۆژ.`);
+        }
+
+        if (activeCycleStart) {
+            const daysSinceStart = Math.round((new Date() - activeCycleStart) / 86400000);
+            const bcActive = birthControl && birthControl.type && birthControl.type !== 'none';
+            const isPregnant = pregnancyMode && pregnancyMode.enabled;
+            if (daysSinceStart > 45 && !bcActive && !isPregnant) {
+                notices.push(`زیاتر لە ٤٥ ڕۆژە سووڕی نوێت تۆمار نەکردووە.`);
+            }
+        }
+
+        if (notices.length === 0) {
+            banner.style.display = 'none';
+            banner.innerHTML = '';
+            return;
+        }
+        banner.style.display = 'block';
+        banner.innerHTML = `⚠️ ${notices.join('<br>')}<br><small>تکایە بۆ دڵنیایی زیاتر ڕاوێژ لەگەڵ پزیشک بکە — ئەمە دیاگنۆز نییە.</small>`;
     }
 
     function renderBCExpiry() {
         const expiryEl = document.getElementById('bcExpiryText');
         if (!expiryEl) return;
 
-        if (!birthControl.insertedDate || !birthControl.durationYears) {
+        const hasYears = birthControl.durationYears && birthControl.type === 'iud';
+        const hasMonths = birthControl.durationMonths && birthControl.type === 'injection';
+
+        if (!birthControl.insertedDate || (!hasYears && !hasMonths)) {
             expiryEl.innerText = '-';
             expiryEl.style.color = '';
             return;
@@ -1875,13 +2734,20 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         const inserted = new Date(birthControl.insertedDate);
         const expiry = new Date(inserted);
-        expiry.setFullYear(expiry.getFullYear() + birthControl.durationYears);
+        if (hasYears) {
+            expiry.setFullYear(expiry.getFullYear() + birthControl.durationYears);
+        } else {
+            expiry.setMonth(expiry.getMonth() + birthControl.durationMonths);
+        }
         const daysLeft = Math.round((expiry - new Date()) / 86400000);
         const dateLabel = expiry.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        // Injections need a much shorter warning window (a few days matter
+        // a lot on a 3-month schedule) than a multi-year IUD does.
+        const warningDays = hasMonths ? 10 : 30;
 
-        if (daysLeft < 30) {
+        if (daysLeft < warningDays) {
             expiryEl.style.color = '#e07a5f';
-            expiryEl.innerText = `${dateLabel} (${daysLeft > 0 ? daysLeft + ' ڕۆژی ماوە' : 'بەسەرچووە!'})`;
+            expiryEl.innerText = `${dateLabel} (${daysLeft > 0 ? daysLeft + ' ڕۆژی ماوە' : 'کاتی نوێکردنەوەی تێپەڕیوە!'})`;
         } else {
             expiryEl.style.color = '';
             expiryEl.innerText = dateLabel;
@@ -1895,12 +2761,131 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         typeSelect.value = birthControl.type || 'none';
         document.getElementById('bcPillFields').style.display = (birthControl.type === 'pill') ? 'block' : 'none';
         document.getElementById('bcDeviceFields').style.display = (birthControl.type === 'iud' || birthControl.type === 'injection') ? 'block' : 'none';
+        document.getElementById('bcYearsField').style.display = (birthControl.type === 'iud') ? 'flex' : 'none';
+        document.getElementById('bcMonthsField').style.display = (birthControl.type === 'injection') ? 'flex' : 'none';
 
         if (birthControl.pillTime) document.getElementById('bcPillTime').value = birthControl.pillTime;
         if (birthControl.insertedDate) document.getElementById('bcInsertedDate').value = birthControl.insertedDate;
         if (birthControl.durationYears) document.getElementById('bcDurationYears').value = birthControl.durationYears;
+        if (birthControl.durationMonths) document.getElementById('bcDurationMonths').value = birthControl.durationMonths;
 
         renderBCExpiry();
+        checkMedicationNotices();
+    }
+
+    // Short, generic, non-diagnostic milestones — general public knowledge,
+    // not a substitute for prenatal care. Index 0 = week 1.
+    const PREGNANCY_WEEK_INFO = [
+        "هەفتەی ١: مانگانەکە تازە دەستی پێکردووە — لێرەوە ژمارەی هەفتەکانی دووگیانی دەژمێردرێت.",
+        "هەفتەی ٢: لەم ماوەیەدا هێلکەدانان ڕوودەدەت.",
+        "هەفتەی ٣: پیتاندن ڕوودەدات و خانەکە دەست بە دابەشبوون دەکات.",
+        "هەفتەی ٤: خانەکە خۆی دەچەسپێنێت بە دیواری منداڵدانەوە.",
+        "هەفتەی ٥: دەستپێکردنی دروستبوونی دڵ و سیستەمی دەمار.",
+        "هەفتەی ٦: لێدانی دڵی زاروو دەست پێدەکات (بە سۆنەر دەردەکەوێت).",
+        "هەفتەی ٧: مۆخ و دەموچاو دەست بە شێوەگرتن دەکەن.",
+        "هەفتەی ٨: قۆڵ و پێ دەست بە دەرکەوتن دەکەن.",
+        "هەفتەی ٩: پەنجەکان دەست بە شێوەگرتن دەکەن.",
+        "هەفتەی ١٠: هەموو ئەندامە سەرەکییەکان دروستبوون، لێرەوە پێی دەڵێن جەنین.",
+        "هەفتەی ١١: زاروو دەست بە جوڵانەوە دەکات (هێشتا نایبینیت).",
+        "هەفتەی ١٢: کۆتایی سێ مانگی یەکەم — مەترسی سکپڕبوون بەرچاوی کەم دەبێتەوە.",
+        "هەفتەی ١٣: دەستپێکردنی سێ مانگی دووەم.",
+        "هەفتەی ١٤: دەموچاو زیاتر ڕوونتر دەبێت.",
+        "هەفتەی ١٥: زاروو دەتوانێت ڕووناکی هەست پێبکات.",
+        "هەفتەی ١٦: لەوانەیە یەکەم جار جوڵانی زاروو هەست پێبکەیت.",
+        "هەفتەی ١٧: قژ و خوناو دەست بە دروستبوون دەکەن.",
+        "هەفتەی ١٨: بەپێی سۆنەر لەوانەیە بتوانیت ڕەگەز دیاری بکەیت.",
+        "هەفتەی ١٩: پێستی زاروو بە چینێکی پارێزەر داپۆشراوە.",
+        "هەفتەی ٢٠: نیوەی ماوەی دووگیانیت تەواو بوو.",
+        "هەفتەی ٢١: هەستکردن بە جوڵانەوە زیاتر ئاشکرا دەبێت.",
+        "هەفتەی ٢٢: برۆ و پێڵوو دەردەکەون.",
+        "هەفتەی ٢٣: زاروو دەتوانێت دەنگ هەست پێبکات.",
+        "هەفتەی ٢٤: مەرحەلەی گرنگی گەشەی سییەکان.",
+        "هەفتەی ٢٥: زاروو زیاتر لە کێش زیاد دەکات.",
+        "هەفتەی ٢٦: چاوەکان کراوەیی دەست پێدەکات.",
+        "هەفتەی ٢٧: کۆتایی سێ مانگی دووەم.",
+        "هەفتەی ٢٨: دەستپێکردنی سێ مانگی سێیەم.",
+        "هەفتەی ٢٩: مۆخ بەخێرایی گەشە دەکات.",
+        "هەفتەی ٣٠: زاروو زیاتر باڵا دەکێشێت.",
+        "هەفتەی ٣١: هەستیارییەکانی زاروو (بینین، بیستن) گەشە دەکەن.",
+        "هەفتەی ٣٢: ئێسکەکان توندتر دەبن.",
+        "هەفتەی ٣٣: پێستی زاروو کەمتر چرووکاو دەبێت.",
+        "هەفتەی ٣٤: سییەکان زۆرتر پێگەیشتوو دەبن.",
+        "هەفتەی ٣٥: زۆرباری زاروو دەست دەکاتە دانانی شێوازی سەرەوخوارەوە.",
+        "هەفتەی ٣٦: زاروو خۆی ئامادە دەکات بۆ لەدایکبوون.",
+        "هەفتەی ٣٧: لەم ماوەیەدا زاروو 'نزیک لە پێگەیشتوویی تەواو' دادەنرێت.",
+        "هەفتەی ٣٨: زۆربەی ئەندامەکان بە تەواوی کاردەکەن.",
+        "هەفتەی ٣٩: زاروو بە تەواوی پێگەیشتووە.",
+        "هەفتەی ٤٠: بەرواری خەمڵێنراوی لەدایکبوون نزیک بووەتەوە."
+    ];
+
+    let pregnancyMode = { enabled: false, lmpDate: null };
+
+    function onPregnancyModeToggle() {
+        const enabled = document.getElementById('pregnancyModeToggle').checked;
+        document.getElementById('pregnancyFields').style.display = enabled ? 'block' : 'none';
+        pregnancyMode.enabled = enabled;
+        savePregnancyData();
+    }
+
+    function savePregnancyData() {
+        pregnancyMode.enabled = document.getElementById('pregnancyModeToggle').checked;
+        pregnancyMode.lmpDate = document.getElementById('pregnancyLMP').value;
+        saveUserData({ glow_pregnancy: pregnancyMode });
+        renderPregnancyWeek();
+        checkPregnancyBCConflict();
+
+        const w = parseFloat(document.getElementById('userWeight').value);
+        const h = parseFloat(document.getElementById('userHeight').value) / 100;
+        if (w > 0 && h > 0) updateBMIBadge(w, h);
+    }
+
+    function renderPregnancyWeek() {
+        const weekTextEl = document.getElementById('pregnancyWeekText');
+        const infoEl = document.getElementById('pregnancyWeekInfo');
+        if (!weekTextEl) return;
+
+        if (!pregnancyMode.enabled || !pregnancyMode.lmpDate) {
+            weekTextEl.innerText = '-';
+            if (infoEl) infoEl.style.display = 'none';
+            return;
+        }
+
+        const lmp = new Date(pregnancyMode.lmpDate);
+        const daysSince = Math.round((new Date() - lmp) / 86400000);
+        const week = Math.floor(daysSince / 7) + 1;
+
+        if (isNaN(week) || week < 1 || week > 42) {
+            weekTextEl.innerText = 'بەرواری نووسراو هەڵەیە، تکایە پشکنینیەوە';
+            if (infoEl) infoEl.style.display = 'none';
+            return;
+        }
+
+        weekTextEl.innerText = `هەفتەی ${week}`;
+        if (infoEl) {
+            const info = PREGNANCY_WEEK_INFO[week - 1];
+            if (info) {
+                infoEl.style.display = 'block';
+                infoEl.innerHTML = `💡 ${info}`;
+            } else {
+                infoEl.style.display = 'none';
+            }
+        }
+    }
+
+    function applyPregnancyToUI() {
+        const toggle = document.getElementById('pregnancyModeToggle');
+        if (!toggle) return;
+
+        toggle.checked = !!pregnancyMode.enabled;
+        document.getElementById('pregnancyFields').style.display = pregnancyMode.enabled ? 'block' : 'none';
+        if (pregnancyMode.lmpDate) document.getElementById('pregnancyLMP').value = pregnancyMode.lmpDate;
+        renderPregnancyWeek();
+
+        // Re-render the BMI badge now that pregnancy status is known — it
+        // was drawn earlier in loadStoredData before this was available.
+        const w = parseFloat(document.getElementById('userWeight').value);
+        const h = parseFloat(document.getElementById('userHeight').value) / 100;
+        if (w > 0 && h > 0) updateBMIBadge(w, h);
     }
 
     function updatePMSUI(val) {
@@ -1914,35 +2899,247 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         saveUserData({ glow_sleep: val });
     }
 
-    function exportMedicalReport() {
+    function toggleDarkMode() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        const icon = document.getElementById('darkModeToggle');
+        if (icon) {
+            icon.classList.toggle('fa-moon', !isDark);
+            icon.classList.toggle('fa-sun', isDark);
+        }
+        saveUserData({ glow_dark_mode: isDark });
+    }
+
+    function changeDisplayName() {
+        const current = document.getElementById('userEmailDisplay').innerText;
+        const newName = prompt('ناوی نوێت بنووسە:', current);
+        if (newName === null) return; // cancelled
+        const cleanName = newName.trim().slice(0, 40);
+        if (!cleanName) return;
+
+        document.getElementById('userEmailDisplay').innerText = cleanName;
+        document.getElementById('userAvatar').innerText = cleanName.charAt(0).toUpperCase();
+        saveUserData({ glow_display_name: cleanName });
+    }
+
+    async function downloadBackup() {
+        if (!window.currentUser || !window.db) return;
+
+        const btn = document.getElementById('backupBtn');
+        const originalText = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner"></i> چاوەڕێبە...'; }
+
+        let data = {};
+        try {
+            const snap = await window.fsGetDoc(window.fsDoc(window.db, "users", window.currentUser.uid));
+            if (snap.exists()) data = snap.data();
+        } catch (error) {
+            console.error("Backup fetch error:", error);
+            showToast("کێشەیەک ڕوویدا لە کاتی وەرگرتنی داتا بۆ باکئەپ.");
+            if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+            return;
+        }
+
+        const rawLabel = document.getElementById('userEmailDisplay') ? document.getElementById('userEmailDisplay').innerText : 'user';
+        const safeLabel = rawLabel.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'user';
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Glow-Backup-${safeLabel}-${formatDateKey(new Date())}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+    }
+
+    // Guards against a hand-edited or corrupted backup file injecting
+    // nonsensical dates (far future/past) into cycle history, daily logs,
+    // weight history, birth control, or pregnancy data — which would
+    // otherwise silently poison averages and countdowns downstream.
+    function sanitizeRestoredData(data) {
+        const today = new Date();
+        const minDate = new Date(today.getFullYear() - 100, 0, 1);
+        const maxDate = new Date(today.getTime() + 86400000); // small slack for timezones
+
+        const isReasonableDate = (d) => d instanceof Date && !isNaN(d) && d >= minDate && d <= maxDate;
+
+        if (Array.isArray(data.glow_cycle_history)) {
+            data.glow_cycle_history = data.glow_cycle_history.filter(s => isReasonableDate(new Date(s)));
+        }
+
+        if (data.glow_daily_logs && typeof data.glow_daily_logs === 'object' && !Array.isArray(data.glow_daily_logs)) {
+            const cleaned = {};
+            Object.keys(data.glow_daily_logs).forEach(k => {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(k) && isReasonableDate(new Date(k))) {
+                    cleaned[k] = data.glow_daily_logs[k];
+                }
+            });
+            data.glow_daily_logs = cleaned;
+        }
+
+        if (Array.isArray(data.glow_weight_history)) {
+            data.glow_weight_history = data.glow_weight_history.filter(e =>
+                e && typeof e.weight === 'number' && e.weight >= 20 && e.weight <= 300 && isReasonableDate(new Date(e.date))
+            );
+        }
+
+        if (data.glow_birth_control && data.glow_birth_control.insertedDate && !isReasonableDate(new Date(data.glow_birth_control.insertedDate))) {
+            delete data.glow_birth_control.insertedDate;
+        }
+
+        if (data.glow_pregnancy && data.glow_pregnancy.lmpDate && !isReasonableDate(new Date(data.glow_pregnancy.lmpDate))) {
+            delete data.glow_pregnancy.lmpDate;
+        }
+
+        return data;
+    }
+
+    function handleRestoreFile(event) {        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            let parsed;
+            try {
+                parsed = JSON.parse(e.target.result);
+            } catch (err) {
+                showToast("فایلەکە دروست نییە (فۆرماتی JSON نادروستە).");
+                event.target.value = '';
+                return;
+            }
+
+            if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+                showToast("ناوەڕۆکی فایلەکە لەگەڵ داتای Glow ناگونجێت.");
+                event.target.value = '';
+                return;
+            }
+
+            parsed = sanitizeRestoredData(parsed);
+
+            if (!confirm("دڵنیایت لە گەڕاندنەوەی داتا؟ ئەمە هەموو داتای ئێستات لەسەر ئەم هەژمارە بە تەواوی دەگۆڕێتەوە بەو داتایەی لە فایلەکەدایە (نەک تێکەڵی بکات) — هەر داتایەک لە فایلەکەدا نەبێت لەناودەچێت.")) {
+                event.target.value = '';
+                return;
+            }
+
+            const btn = document.getElementById('restoreBtn');
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner"></i> چاوەڕێبە...'; }
+
+            try {
+                // No {merge:true} here on purpose: a restore should fully
+                // replace the current data with the backup's data, not
+                // merge the two together (merging would leave behind
+                // anything added after the backup was taken).
+                await window.fsSetDoc(
+                    window.fsDoc(window.db, "users", window.currentUser.uid),
+                    parsed
+                );
+                showToast("داتاکە بە سەرکەوتوویی گەڕایەوە. پەڕەکە نوێ دەکرێتەوە...");
+                setTimeout(() => location.reload(), 1500);
+            } catch (err) {
+                console.error("Restore error:", err);
+                showToast("کێشەیەک ڕوویدا لە کاتی گەڕاندنەوەی داتا.");
+                if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+            }
+            event.target.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    async function confirmDeleteAccount() {
+        if (!confirm("ئاگاداری زۆر گرنگ: ئەمە هەموو داتاکانت و هەژمارەکەت بە تەواوی دەسڕێتەوە و ناتوانرێت بگەڕێندرێتەوە. دڵنیایت؟")) return;
+
+        const typed = prompt('بۆ دڵنیایی، وشەی "سڕینەوە" بنووسە (بەبێ کوماو):');
+        if (typed === null) return; // cancelled
+
+        // Strip zero-width/invisible characters some mobile keyboards can
+        // insert, so a legitimate correct answer isn't rejected by mistake.
+        const normalized = typed.replace(/[\u200B-\u200F\uFEFF]/g, '').trim();
+        if (normalized !== 'سڕینەوە') {
+            showToast('وشەکە ڕاست نەنووسرا، سڕینەوە هەڵوەشێندرایەوە.');
+            return;
+        }
+
+        const btn = document.getElementById('deleteAccountBtn');
+        const originalText = btn ? btn.innerHTML : '';
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner"></i> چاوەڕێبە...'; }
+
+        const result = await window.deleteAccountAndData();
+
+        if (result === 'ok') {
+            alert("هەژمار و هەموو داتاکانت بە تەواوی سڕایەوە.");
+            location.reload();
+        } else if (result === 'needs-recent-login') {
+            showToast("لەبەر ئاسایش، پێویستە دووبارە بچیتە دەرەوە و بچیتەوە ژوورەوە، پاشان دووبارە هەوڵی سڕینەوە بدەیت.");
+            if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+        } else {
+            showToast("کێشەیەک ڕوویدا لە کاتی سڕینەوەی هەژمار. تکایە دووبارە هەوڵبدەرەوە.");
+            if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+        }
+    }
+
+    const REPORT_LABELS = {
+        en: {
+            dir: 'ltr', title: 'Glow Medical Comprehensive Report', generated: 'Generated',
+            currentStatus: 'Current Status', lastPeriod: 'Last Period Start', weight: 'Body Weight',
+            height: 'Height', sleep: 'Sleep', pms: 'PMS Severity Score', discharge: 'Discharge Status',
+            hydration: 'Hydration', symptoms: 'Symptoms Today', birthControl: 'Birth Control',
+            medications: 'Medications', cycleHistory: 'Recent Cycle History', weightHistory: 'Recent Weight History',
+            footer: 'Generated for Gynecologist Review. This report is not a medical diagnosis. Please consult a qualified doctor.',
+            none: 'None', noneRecorded: 'None recorded', noneReported: 'None reported', notSpecified: 'Not specified',
+            dailyPill: 'Daily pill (reminder', valid: 'valid', years: 'years', months: 'months', inserted: 'inserted',
+            glasses: 'glasses', hours: 'hours'
+        },
+        ku: {
+            dir: 'rtl', title: 'ڕاپۆرتی تەواوی پزیشکی Glow', generated: 'دروستکراوە لە',
+            currentStatus: 'دۆخی ئێستا', lastPeriod: 'دەستپێکردنی دوایین سووڕ', weight: 'کێشی جەستە',
+            height: 'باڵا', sleep: 'خەو', pms: 'ئاستی PMS', discharge: 'دۆخی دەردراو',
+            hydration: 'ئاوخواردنەوە', symptoms: 'نیشانەکانی ئەمڕۆ', birthControl: 'بەرگری لە سکپڕبوون',
+            medications: 'دەرمانەکان', cycleHistory: 'مێژووی دواین سووڕەکان', weightHistory: 'مێژووی کێش',
+            footer: 'ئەم ڕاپۆرتە بۆ پیشاندان بە پزیشکی ژنانە. ئەمە دیاگنۆزی پزیشکی نییە. تکایە ڕاوێژ لەگەڵ پزیشکێکی شارەزا بکە.',
+            none: 'هیچ نییە', noneRecorded: 'هیچ تۆمارێک نییە', noneReported: 'هیچ نیشانەیەک تۆمار نەکراوە', notSpecified: 'دیاری نەکراوە',
+            dailyPill: 'حەبی ڕۆژانە (بیرخستنەوە', valid: 'بەمانگرتوو بۆ', years: 'ساڵ', months: 'مانگ', inserted: 'دانراوە لە',
+            glasses: 'پەرداخ', hours: 'کاتژمێر'
+        }
+    };
+
+    function exportMedicalReport(lang) {
+        lang = (lang === 'ku') ? 'ku' : 'en';
+        const L = REPORT_LABELS[lang];
+
         const lastCycle = activeCycleStart ? activeCycleStart.toDateString() : 'N/A';
         const weight = document.getElementById('userWeight').value || 'N/A';
         const height = document.getElementById('userHeight').value || 'N/A';
         const pmsScore = document.getElementById('pmsRange').value;
         const sleep = document.getElementById('sleepHours').value || 'N/A';
         const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-item.selected'))
-            .map(el => el.textContent.trim()).join(', ') || 'None reported';
+            .map(el => el.textContent.trim()).join(', ') || L.noneReported;
         const dischargeVal = document.getElementById('dischargeSelect').value;
 
         const medsRows = medications.length
             ? medications.map(m => `<tr><td>${escapeHTML(m.name)}</td><td>${escapeHTML(m.time)}</td></tr>`).join('')
-            : '<tr><td colspan="2">None</td></tr>';
+            : `<tr><td colspan="2">${L.none}</td></tr>`;
 
         const cycleRows = cycleHistory.length
             ? cycleHistory.slice(0, 8).map(d => `<tr><td>${escapeHTML(d)}</td></tr>`).join('')
-            : '<tr><td>None recorded</td></tr>';
+            : `<tr><td>${L.noneRecorded}</td></tr>`;
 
         const weightRows = (weightHistory || []).length
             ? weightHistory.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8)
                 .map(e => `<tr><td>${new Date(e.date).toDateString()}</td><td>${e.weight} kg</td></tr>`).join('')
-            : '<tr><td colspan="2">None recorded</td></tr>';
+            : `<tr><td colspan="2">${L.noneRecorded}</td></tr>`;
 
-        let bcInfo = 'Not specified';
+        let bcInfo = L.notSpecified;
         if (birthControl && birthControl.type && birthControl.type !== 'none') {
             if (birthControl.type === 'pill') {
-                bcInfo = `Daily pill (reminder: ${escapeHTML(birthControl.pillTime || 'N/A')})`;
+                bcInfo = `${L.dailyPill}: ${escapeHTML(birthControl.pillTime || 'N/A')})`;
+            } else if (birthControl.insertedDate && birthControl.type === 'injection') {
+                bcInfo = `${escapeHTML(birthControl.type.toUpperCase())} — ${L.inserted} ${escapeHTML(birthControl.insertedDate)}, ${L.valid} ${escapeHTML(String(birthControl.durationMonths || '?'))} ${L.months}`;
             } else if (birthControl.insertedDate) {
-                bcInfo = `${escapeHTML(birthControl.type.toUpperCase())} — inserted ${escapeHTML(birthControl.insertedDate)}, valid ${escapeHTML(String(birthControl.durationYears || '?'))} years`;
+                bcInfo = `${escapeHTML(birthControl.type.toUpperCase())} — ${L.inserted} ${escapeHTML(birthControl.insertedDate)}, ${L.valid} ${escapeHTML(String(birthControl.durationYears || '?'))} ${L.years}`;
             } else {
                 bcInfo = escapeHTML(birthControl.type);
             }
@@ -1956,16 +3153,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         reportWindow.document.write(`
             <!DOCTYPE html>
-            <html>
+            <html dir="${L.dir}">
             <head>
             <meta charset="UTF-8">
-            <title>Glow Medical Report</title>
+            <title>${L.title}</title>
             <style>
-                body { font-family: Arial, Helvetica, sans-serif; padding: 30px; color: #2b2d42; max-width: 700px; margin: 0 auto; }
+                body { font-family: ${lang === 'ku' ? "'Vazirmatn', " : ''}Arial, Helvetica, sans-serif; padding: 30px; color: #2b2d42; max-width: 700px; margin: 0 auto; }
                 h1 { color: #e07a5f; border-bottom: 2px solid #e07a5f; padding-bottom: 8px; font-size: 22px; }
                 h3 { margin-top: 26px; margin-bottom: 6px; color: #2b2d42; font-size: 15px; }
                 table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-                td, th { padding: 7px 8px; border-bottom: 1px solid #eee; font-size: 13px; text-align: left; }
+                td, th { padding: 7px 8px; border-bottom: 1px solid #eee; font-size: 13px; text-align: ${L.dir === 'rtl' ? 'right' : 'left'}; }
                 td:first-child { font-weight: bold; width: 40%; }
                 .meta { color: #8d99ae; font-size: 12px; margin-bottom: 10px; }
                 .footer { margin-top: 30px; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
@@ -1973,32 +3170,32 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             </style>
             </head>
             <body>
-            <h1>Glow Medical Comprehensive Report</h1>
-            <p class="meta">Generated: ${new Date().toDateString()}</p>
+            <h1>${L.title}</h1>
+            <p class="meta">${L.generated}: ${new Date().toDateString()}</p>
 
-            <h3>Current Status</h3>
+            <h3>${L.currentStatus}</h3>
             <table>
-                <tr><td>Last Period Start</td><td>${lastCycle}</td></tr>
-                <tr><td>Body Weight</td><td>${weight} kg</td></tr>
-                <tr><td>Height</td><td>${height} cm</td></tr>
-                <tr><td>Sleep</td><td>${sleep} hours</td></tr>
-                <tr><td>PMS Severity Score</td><td>${pmsScore}/10</td></tr>
-                <tr><td>Discharge Status</td><td>${escapeHTML(dischargeVal)}</td></tr>
-                <tr><td>Hydration</td><td>${waterCount}/8 glasses</td></tr>
-                <tr><td>Symptoms Today</td><td>${escapeHTML(selectedSymptoms)}</td></tr>
-                <tr><td>Birth Control</td><td>${bcInfo}</td></tr>
+                <tr><td>${L.lastPeriod}</td><td>${lastCycle}</td></tr>
+                <tr><td>${L.weight}</td><td>${weight} kg</td></tr>
+                <tr><td>${L.height}</td><td>${height} cm</td></tr>
+                <tr><td>${L.sleep}</td><td>${sleep} ${L.hours}</td></tr>
+                <tr><td>${L.pms}</td><td>${pmsScore}/10</td></tr>
+                <tr><td>${L.discharge}</td><td>${escapeHTML(dischargeVal)}</td></tr>
+                <tr><td>${L.hydration}</td><td>${waterCount}/8 ${L.glasses}</td></tr>
+                <tr><td>${L.symptoms}</td><td>${escapeHTML(selectedSymptoms)}</td></tr>
+                <tr><td>${L.birthControl}</td><td>${bcInfo}</td></tr>
             </table>
 
-            <h3>Medications</h3>
+            <h3>${L.medications}</h3>
             <table><tbody>${medsRows}</tbody></table>
 
-            <h3>Recent Cycle History</h3>
+            <h3>${L.cycleHistory}</h3>
             <table><tbody>${cycleRows}</tbody></table>
 
-            <h3>Recent Weight History</h3>
+            <h3>${L.weightHistory}</h3>
             <table><tbody>${weightRows}</tbody></table>
 
-            <p class="footer">Generated for Gynecologist Review. This report is not a medical diagnosis. Please consult a qualified doctor.</p>
+            <p class="footer">${L.footer}</p>
             </body>
             </html>
         `);
@@ -2022,8 +3219,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // Keywords that signal the user wants a medication dose/prescription, or
     // is describing a potentially urgent symptom — handled locally instead
     // of trusting the AI's raw answer for these specific, higher-risk asks.
-    const AI_URGENT_KEYWORDS = ['خوێنبەربوونی زۆر', 'ئازاری توند', 'تای بەرز', 'بیرکردنەوەی خۆکوشتن', 'ئازاری سک زۆر'];
-    const AI_DOSAGE_KEYWORDS = ['دۆز', 'چەند حەب', 'چەند مل', 'ملیگرام'];
+    const AI_URGENT_KEYWORDS = [
+        'خوێنبەربوونی زۆر', 'ئازاری توند', 'تای بەرز', 'بیرکردنەوەی خۆکوشتن', 'ئازاری سک زۆر',
+        'زۆر خوێن دەچێت', 'خوێن زۆرە', 'لە هۆش دەچم', 'هۆشم دەچێت', 'ناتوانم هەناسە بدەم',
+        'ئازارێکی زۆر توند', 'گیرفانم پڕە لە خوێن', 'ڕەنگم زەرد بووە', 'سکم زۆر ئێش دەکات',
+        'قەیران', 'فریاگوزاری', 'خۆم پێناچێت', 'ترسناکە', 'بۆشایی سەر'
+    ];
+    const AI_DOSAGE_KEYWORDS = ['دۆز', 'چەند حەب', 'چەند مل', 'ملیگرام', 'چ دەرمانێک', 'کام دەرمان', 'چ حەبێک بخۆم'];
 
     async function submitUserAIQuery() {
         const input = document.getElementById('aiUserPrompt');
@@ -2059,6 +3261,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const typingId = appendAIMessage('🤖 AI لە حالەتی بیرکردنەوەدایە...', 'ai ai-typing');
 
         aiChatHistory.push({ role: "user", parts: [{ text: text }] });
+        trimAIChatHistory();
 
         try {
             // بەکارهێنانی Gemini Flash Model
@@ -2074,6 +3277,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             if (data.candidates && data.candidates[0].content.parts[0].text) {
                 const aiReply = data.candidates[0].content.parts[0].text;
                 aiChatHistory.push({ role: "model", parts: [{ text: aiReply }] });
+                trimAIChatHistory();
                 appendAIMessage(aiReply, 'ai');
             } else {
                 generateLocalFallbackAIResponse(text);
@@ -2081,6 +3285,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         } catch (error) {
             document.getElementById(typingId).remove();
             generateLocalFallbackAIResponse(text);
+        }
+    }
+
+    // Keeps the original system-prompt pair (the two fixed messages that
+    // set the assistant's persona and safety rules) plus only the most
+    // recent exchanges — otherwise a long chat session sends an
+    // ever-growing history to the API on every single message, getting
+    // slower and more expensive the longer it runs.
+    function trimAIChatHistory() {
+        const MAX_RECENT = 20;
+        if (aiChatHistory.length > MAX_RECENT + 2) {
+            aiChatHistory = [aiChatHistory[0], aiChatHistory[1], ...aiChatHistory.slice(-MAX_RECENT)];
         }
     }
 
@@ -2101,6 +3317,15 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         msgDiv.className = `msg-bubble msg-${sender}`;
         msgDiv.innerText = text;
         chatBox.appendChild(msgDiv);
+
+        // Cap how many message bubbles stay in the DOM — a very long chat
+        // session would otherwise keep growing the page's memory/DOM size
+        // for no real benefit, since old messages scroll out of view anyway.
+        const MAX_VISIBLE_MESSAGES = 60;
+        while (chatBox.children.length > MAX_VISIBLE_MESSAGES) {
+            chatBox.removeChild(chatBox.firstElementChild);
+        }
+
         chatBox.scrollTop = chatBox.scrollHeight;
         return msgId;
     }
@@ -2115,6 +3340,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
 
         aiChatHistory.push({ role: "model", parts: [{ text: reply }] });
+        trimAIChatHistory();
         appendAIMessage(reply, 'ai');
     }
 
@@ -2128,6 +3354,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         document.getElementById('aiUserPrompt').value = summaryPrompt;
         submitUserAIQuery();
     }
+
+    // Re-checks medication/birth-control reminder times every minute while
+    // this tab stays open, so the banner appears/disappears on its own
+    // instead of only updating on page load or when data changes.
+    setInterval(() => {
+        if (window.currentUser) checkMedicationNotices();
+    }, 60000);
 </script>
 
 </body>
