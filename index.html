@@ -24,6 +24,8 @@
             --text-muted: #8d99ae;
             --border: #f0e6e1;
             --radius-md: 12px;
+            --blush: #ffc9de;
+            --blush-soft: #ffe5ef;
         }
 
         body.dark-mode {
@@ -113,6 +115,42 @@
             flex-direction: column;
             justify-content: center;
             overflow-y: auto;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Soft blurred blobs floating behind the content — decorative only,
+           kept out of the way with negative z-index and no pointer events. */
+        #auth-screen::before,
+        #auth-screen::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(2px);
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        #auth-screen::before {
+            width: 180px;
+            height: 180px;
+            background: var(--blush-soft);
+            top: -50px;
+            right: -60px;
+        }
+
+        #auth-screen::after {
+            width: 140px;
+            height: 140px;
+            background: var(--primary-soft);
+            bottom: -30px;
+            left: -50px;
+        }
+
+        body.dark-mode #auth-screen::before,
+        body.dark-mode #auth-screen::after {
+            opacity: 0.12;
         }
 
         .avatar-characters-container {
@@ -139,6 +177,51 @@
         .char-2 { background: #cdb4db; height: 75px; }
         .char-3 { background: #fec5bb; height: 55px; }
 
+        /* Little blush marks — sit a bit brighter while "shy" (already the
+           moment the hands come up to cover the eyes), so the blush reads
+           as an actual blush reaction, not just static decoration. */
+        .char::before,
+        .char::after {
+            content: '';
+            position: absolute;
+            width: 7px;
+            height: 5px;
+            background: rgba(255, 105, 135, 0.4);
+            border-radius: 50%;
+            top: 32px;
+            opacity: 0.4;
+            transition: opacity 0.25s ease;
+        }
+
+        .char::before { right: 7px; }
+        .char::after { left: 7px; }
+
+        .shy .char::before,
+        .shy .char::after {
+            opacity: 0.9;
+        }
+
+        .bow {
+            position: absolute;
+            top: -9px;
+            width: 16px;
+            height: 9px;
+            z-index: 1;
+        }
+
+        .bow::before,
+        .bow::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--purple);
+            top: 0;
+        }
+
+        .bow::before { left: 0; border-radius: 8px 8px 8px 1px; transform: rotate(-20deg); }
+        .bow::after { right: 0; border-radius: 8px 8px 1px 8px; transform: rotate(20deg); }
+
         .eyes {
             display: flex;
             gap: 10px;
@@ -153,6 +236,20 @@
             background: #2b2d42;
             border-radius: 50%;
             position: relative;
+        }
+
+        /* Tiny lash on each eye — purely cosmetic, no effect on the
+           existing shy/blink animation which still targets .eyes/.eye. */
+        .eye::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            right: 1px;
+            width: 6px;
+            height: 2px;
+            background: #2b2d42;
+            border-radius: 2px;
+            transform: rotate(-25deg);
         }
 
         .pupil {
@@ -195,16 +292,46 @@
         }
 
         .app-title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
-            color: var(--text-dark);
             margin-bottom: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-title i {
+            -webkit-text-fill-color: var(--blush);
+            color: var(--blush);
+            font-size: 18px;
         }
 
         .app-subtitle {
             font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 25px;
+            margin-bottom: 12px;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--blush);
+            font-size: 10px;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            width: 40px;
+            height: 1px;
+            background: var(--border);
         }
 
         .form-group {
@@ -239,13 +366,19 @@
             transform: translateY(-50%);
             color: var(--text-muted);
             cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .input-wrapper i.toggle-password:hover {
+            color: var(--primary);
+            transform: translateY(-50%) scale(1.15);
         }
 
         .input-wrapper input {
             width: 100%;
             padding: 13px 40px 13px 40px;
             border: 1.5px solid var(--border);
-            border-radius: var(--radius-md);
+            border-radius: 26px;
             outline: none;
             font-size: 14px;
             transition: all 0.2s ease;
@@ -255,6 +388,7 @@
         .input-wrapper input:focus {
             border-color: var(--primary);
             background: #fff;
+            box-shadow: 0 0 0 4px var(--blush-soft);
         }
 
         .btn-primary {
@@ -263,16 +397,35 @@
             background: linear-gradient(135deg, var(--primary), var(--purple));
             color: #fff;
             border: none;
-            border-radius: var(--radius-md);
+            border-radius: 26px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 8px 15px rgba(224, 122, 95, 0.2);
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -60%;
+            width: 40%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.6s ease;
         }
 
         .btn-primary:hover {
             opacity: 0.95;
+            box-shadow: 0 10px 20px rgba(224, 122, 95, 0.3);
+        }
+
+        .btn-primary:hover::after {
+            left: 130%;
         }
 
         .auth-actions {
@@ -584,12 +737,21 @@
             color: var(--purple);
         }
 
+        .symptom-item.custom-symptom-item {
+            position: relative;
+            padding-top: 18px;
+        }
+
         .symptom-item .custom-symptom-delete {
+            position: absolute;
+            top: 0;
+            left: 0;
             display: inline-block;
-            font-size: 10px;
-            margin: 4px 0 0 0;
+            font-size: 12px;
+            padding: 8px;
+            line-height: 1;
             color: var(--text-muted);
-            opacity: 0.6;
+            opacity: 0.7;
         }
 
         .symptom-item.selected {
@@ -758,6 +920,32 @@
             background: #e9ecef;
         }
 
+        /* Same green used for the calendar's ovulation-window highlight,
+           so "today's chance" and the calendar agree visually instead of
+           using two unrelated color languages (emoji dots vs. green cells). */
+        .fertility-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .fertility-high {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .fertility-medium {
+            background: #cfe8db;
+            color: #1b5e20;
+        }
+
+        .fertility-low {
+            background: #e9ecef;
+            color: var(--text-muted);
+        }
+
         .med-reminder-item {
             display: flex;
             justify-content: space-between;
@@ -895,6 +1083,7 @@
                 <div class="hands"><div class="hand"></div><div class="hand"></div></div>
             </div>
             <div class="char char-2">
+                <div class="bow"></div>
                 <div class="eyes"><div class="eye"><div class="pupil"></div></div><div class="eye"><div class="pupil"></div></div></div>
                 <div class="hands"><div class="hand"></div><div class="hand"></div></div>
             </div>
@@ -904,8 +1093,9 @@
             </div>
         </div>
 
-        <div class="app-title">Glow Care</div>
+        <div class="app-title">Glow Care <i class="fa-solid fa-heart"></i></div>
         <div class="app-subtitle">سیستمی پرۆفێشیناڵی چاودێری تەندروستی کچان</div>
+        <div class="auth-divider"><i class="fa-solid fa-spa"></i></div>
 
         <form id="loginForm">
             <div class="form-group">
@@ -964,9 +1154,7 @@
                     <div id="bloodClotWarningBanner" class="alert-banner alert-critical" style="display:none;"></div>
                     <div id="pregnancyDangerBanner" class="alert-banner alert-critical" style="display:none;"></div>
                     <div id="healthRiskBanner" class="alert-banner alert-risk" style="display:none;"></div>
-                    <div id="upcomingPeriodBanner" class="alert-banner alert-info" style="display:none;"></div>
-                    <div id="medReminderBanner" class="alert-banner alert-success" style="display:none;"></div>
-                    <div id="logNudgeBanner" class="alert-banner alert-nudge" style="display:none;"></div>
+                    <div id="infoBanner" class="alert-banner alert-info" style="display:none;"></div>
                 </div>
                 
                 <div class="card-box">
@@ -1021,7 +1209,7 @@
                             </div>
                             <div class="status-item">
                                 <span>چانسی هێلکەدانان بۆ ئەمڕۆ:</span>
-                                <span class="status-value" id="todayFertilityText">-</span>
+                                <span class="fertility-badge fertility-low" id="todayFertilityText">-</span>
                             </div>
                         </div>
                         <p id="ovulationConfirmNote" style="font-size: 10.5px; color: var(--accent); margin-top: 6px; display: none;"></p>
@@ -1112,6 +1300,7 @@
                         <input type="checkbox" id="pmsImpactToggle" onchange="savePMSImpact()" style="width: 18px; height: 18px;">
                     </div>
                     <p id="pmdNote" style="display:none; font-size: 10.5px; color: var(--primary); margin-top: 6px;">⚠️ کۆبوونەوەی ئاستی PMS بەرز لەگەڵ کاریگەری بەرچاو لەسەر کار/پەیوەندییەکان، لەوانەیە پەیوەندی بە PMDD ـەوە هەبێت (شێوازێکی توندتری PMS کە پێویستی بە چاودێری پزیشکی تایبەتە). تکایە لەگەڵ پزیشک باسی بکە.</p>
+                    <p id="combinedAdvisoryNote" style="display:none; font-size: 10.5px; color: var(--primary); margin-top: 6px; font-weight: 600;">🔗 هەروەها ئازاری توندی خوێنبردنت لەم سووڕەدا تۆمارکراوە — کاتێک ئەم دووانە پێکەوە دەبن، باشترە هەردووکیان بەیەکەوە لەگەڵ پزیشک باس بکرێن، چونکە دەکرێت هۆکاری هاوبەشیان هەبێت.</p>
                 </div>
 
                 <div class="card-box">
@@ -1225,6 +1414,16 @@
                                 <option value="unprotected">هەبووە — بێ پارێزگاری</option>
                             </select>
                         </div>
+                        <div class="config-row" style="margin-top: 10px; margin-bottom: 4px;">
+                            <span>دۆخی سەرویکس (Cervix):</span>
+                            <select id="cervixPositionSelect" onchange="saveCervixPosition()">
+                                <option value="not_checked">پشکنین نەکراوە</option>
+                                <option value="low_firm">نزم و سەخت (Low/Firm)</option>
+                                <option value="medium">مامناوەند</option>
+                                <option value="high_soft_open">بەرز، نەرم، کراوە (High/Soft/Open)</option>
+                            </select>
+                        </div>
+                        <p id="cervixPositionNote" style="font-size: 10.5px; color: var(--text-muted); display: none;">💡 دۆخی "بەرز، نەرم، کراوە" بەگشتی نزیکترین نیشانەیە بۆ نزیکبوونەوە لە هێلکەدانان.</p>
                     </details>
 
                     <div class="config-row" style="margin-top: 14px; flex-direction: column; align-items: stretch;">
@@ -1448,30 +1647,28 @@
                 <div class="card-box">
                     <details>
                         <summary class="card-header-title">
-                            <i class="fa-solid fa-chart-column"></i> مێژووی درێژی سووڕ
+                            <i class="fa-solid fa-chart-column"></i> چارتی مێژوویی
                         </summary>
-                        <div id="cycleLengthChart"></div>
-                        <p id="cycleLengthChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">پێویستە بەلایەنی کەم دوو سووڕ تۆمار بکەیت بۆ پیشاندانی گراف.</p>
-                    </details>
-                </div>
-
-                <div class="card-box">
-                    <details>
-                        <summary class="card-header-title">
-                            <i class="fa-solid fa-weight-scale"></i> مێژووی کێشی جەستە
-                        </summary>
-                        <div id="weightHistoryChart"></div>
-                        <p id="weightChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا هیچ تۆماری کێش نییە.</p>
-                    </details>
-                </div>
-
-                <div class="card-box">
-                    <details>
-                        <summary class="card-header-title">
-                            <i class="fa-solid fa-thermometer-half"></i> مێژووی پلەی گەرمی جەستە (BBT)
-                        </summary>
-                        <div id="bbtChart"></div>
-                        <p id="bbtChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا هیچ تۆماری BBT نییە.</p>
+                        <div class="config-row" style="margin-bottom: 10px;">
+                            <span>پیشاندانی:</span>
+                            <select id="chartTypeSelector" onchange="switchHistoryChart()">
+                                <option value="cycle">درێژی سووڕ</option>
+                                <option value="weight">کێشی جەستە</option>
+                                <option value="bbt">پلەی گەرمی جەستە (BBT)</option>
+                            </select>
+                        </div>
+                        <div id="cycleLengthChartWrapper">
+                            <div id="cycleLengthChart"></div>
+                            <p id="cycleLengthChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">پێویستە بەلایەنی کەم دوو سووڕ تۆمار بکەیت بۆ پیشاندانی گراف.</p>
+                        </div>
+                        <div id="weightHistoryChartWrapper" style="display:none;">
+                            <div id="weightHistoryChart"></div>
+                            <p id="weightChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا هیچ تۆماری کێش نییە.</p>
+                        </div>
+                        <div id="bbtChartWrapper" style="display:none;">
+                            <div id="bbtChart"></div>
+                            <p id="bbtChartEmpty" style="font-size: 11px; color: var(--text-muted); text-align: center;">هێشتا هیچ تۆماری BBT نییە.</p>
+                        </div>
                     </details>
                 </div>
 
@@ -1504,6 +1701,22 @@
                         <button class="btn-secondary" id="backupBtn" onclick="downloadBackup()"><i class="fa-solid fa-download"></i> داونلۆدی هەموو داتاکان</button>
                         <input type="file" id="restoreFileInput" accept=".json" style="display:none;" onchange="handleRestoreFile(event)">
                         <button class="btn-secondary" id="restoreBtn" style="margin-top: 8px;" onclick="document.getElementById('restoreFileInput').click()"><i class="fa-solid fa-upload"></i> گەڕاندنەوەی داتا لە فایل</button>
+                        <button class="btn-secondary" id="csvExportBtn" style="margin-top: 8px;" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> دەرکردنی لۆگی ڕۆژانە وەک CSV/Excel</button>
+                    </details>
+                </div>
+
+                <div class="card-box">
+                    <details>
+                        <summary class="card-header-title">
+                            <i class="fa-solid fa-lock"></i> کۆدی نهێنی ئەپ (App Lock)
+                        </summary>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">کۆدێکی ٤-٦ ژمارەیی دابنێ بۆ پاراستنی ئەپەکە ئەگەر کەسێکی تر مۆبایلەکەت هەڵگرت دوای چوونەژوورەوەت. ئەمە جیاوازە لە پاسۆردی هەژمارەکەت.</p>
+                        <div class="config-row">
+                            <span>کۆدی نوێ (٤-٦ ژمارە):</span>
+                            <input type="password" id="newPinInput" inputmode="numeric" maxlength="6" style="width: 100px;">
+                        </div>
+                        <button class="btn-secondary" onclick="setAppPIN()"><i class="fa-solid fa-key"></i> دانانی کۆد</button>
+                        <button class="btn-secondary btn-danger" id="removePinBtn" style="display:none; margin-top: 8px;" onclick="removeAppPIN()"><i class="fa-solid fa-lock-open"></i> لابردنی کۆد</button>
                     </details>
                 </div>
 
@@ -1547,6 +1760,17 @@
 
     </div>
 
+</div>
+
+<!-- APP LOCK: a local PIN gate on top of the dashboard, separate from
+     Firebase login — protects the data if the phone itself is picked up
+     while already signed in. -->
+<div id="pinLockOverlay" style="display:none; position:fixed; inset:0; background:var(--bg); z-index:99999; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center;">
+    <i class="fa-solid fa-lock" style="font-size:40px; color:var(--primary); margin-bottom:16px;"></i>
+    <h3 style="margin-bottom:16px; color:var(--text-dark);">تکایە کۆدی نهێنی بنووسە</h3>
+    <input type="password" id="pinLockInput" inputmode="numeric" maxlength="6" style="font-size:24px; text-align:center; letter-spacing:8px; padding:10px; border-radius:10px; border:1px solid var(--border); width:180px; margin-bottom:12px;" onkeypress="if(event.key==='Enter') attemptUnlockPIN()">
+    <button class="btn-secondary" style="width:180px; margin-top:0;" onclick="attemptUnlockPIN()">کردنەوە</button>
+    <p id="pinLockError" style="color:#a4133c; font-size:12px; margin-top:10px; display:none;">کۆدی نهێنی هەڵەیە.</p>
 </div>
 
 <!-- FIREBASE SDKs v12.18.0 & AUTHENTICATION INTEGRATION -->
@@ -1859,6 +2083,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             console.error("Firestore load error:", error);
         }
 
+        appPIN = data.glow_app_pin || null;
+        const removePinBtn = document.getElementById('removePinBtn');
+        if (removePinBtn) removePinBtn.style.display = appPIN ? 'block' : 'none';
+        showPinLockIfNeeded();
+
         const storedStart = data.glow_cycle_start;
         const storedWater = data.glow_water_count;
         const storedHistory = data.glow_cycle_history;
@@ -1980,6 +2209,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         // that calculateAndRender() (called earlier, before dailyLogs was
         // populated) couldn't have seen it yet.
         if (activeCycleStart) showConfirmedOvulationNote(activeCycleStart);
+        checkPMDDPattern();
 
         if (storedBC) {
             birthControl = storedBC;
@@ -2117,7 +2347,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             document.getElementById('nextPeriodText').innerText = "نادیار (سووڕی ناڕێک)";
             document.getElementById('ovulationText').innerText = "مەودای نادیار (PCOS)";
             const fertilityEl = document.getElementById('todayFertilityText');
-            if (fertilityEl) fertilityEl.innerText = 'نادیار';
+            if (fertilityEl) {
+                fertilityEl.innerText = 'نادیار';
+                fertilityEl.classList.remove('fertility-high', 'fertility-medium');
+                fertilityEl.classList.add('fertility-low');
+            }
             window._lastAdviceType = "irregular";
             updateMedicalAdvice("irregular");
             renderCalendar(activeCycleStart, null, null, 28, durationVal);
@@ -2164,11 +2398,19 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const startDay = new Date(ovulationStart.getFullYear(), ovulationStart.getMonth(), ovulationStart.getDate());
         const endDay = new Date(ovulationEnd.getFullYear(), ovulationEnd.getMonth(), ovulationEnd.getDate());
 
+        el.classList.remove('fertility-high', 'fertility-medium', 'fertility-low');
         if (todayDay >= startDay && todayDay <= endDay) {
             const daysFromPeak = Math.abs(Math.round((todayDay - peakDay) / 86400000));
-            el.innerText = daysFromPeak <= 1 ? 'بەرز 🔴' : 'مامناوەند 🟡';
+            if (daysFromPeak <= 1) {
+                el.innerText = 'بەرز';
+                el.classList.add('fertility-high');
+            } else {
+                el.innerText = 'مامناوەند';
+                el.classList.add('fertility-medium');
+            }
         } else {
-            el.innerText = 'کەم ⚪';
+            el.innerText = 'کەم';
+            el.classList.add('fertility-low');
         }
     }
 
@@ -2214,25 +2456,41 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         noteEl.innerText = '';
     }
 
+    let infoBannerMessages = { period: '', medication: '', nudge: '' };
+
+    // The period/medication/nudge banners are all "just FYI" severity, so
+    // they're combined into one box instead of three separate colored
+    // blocks — critical/risk banners stay as their own, more prominent,
+    // elements above this.
+    function renderInfoBanner() {
+        const banner = document.getElementById('infoBanner');
+        if (!banner) return;
+        const parts = [infoBannerMessages.period, infoBannerMessages.medication, infoBannerMessages.nudge].filter(Boolean);
+        if (parts.length === 0) {
+            banner.style.display = 'none';
+            banner.innerHTML = '';
+            return;
+        }
+        banner.style.display = 'block';
+        banner.innerHTML = parts.join('<hr style="border:none; border-top:1px solid rgba(0,0,0,0.08); margin:6px 0;">');
+    }
+
     function showUpcomingPeriodBanner(nextPeriod) {
         const daysLeft = Math.round((nextPeriod - new Date()) / 86400000);
-        const banner = document.getElementById('upcomingPeriodBanner');
-        if (!banner) return;
 
         if (daysLeft >= 0 && daysLeft <= 3) {
-            banner.style.display = 'block';
-            banner.innerText = daysLeft === 0
+            infoBannerMessages.period = daysLeft === 0
                 ? '🔔 پێشبینی دەکرێت سووڕەکەت ئەمڕۆ دەست پێبکات.'
                 : `🔔 پێشبینی دەکرێت سووڕەکەت لە ماوەی ${daysLeft} ڕۆژدا دەست پێبکات.`;
         } else if (daysLeft < 0 && Math.abs(daysLeft) <= 60) {
             // The predicted date has already passed — most likely the
             // person just hasn't logged a new cycle yet, so nudge them
             // instead of silently going quiet.
-            banner.style.display = 'block';
-            banner.innerText = `ℹ️ بەرواری پێشبینیکراوی سووڕەکەت ${Math.abs(daysLeft)} ڕۆژە تێپەڕیوە. ئەگەر سووڕەکەت دەستی پێکردووە، تکایە تۆماری بکە.`;
+            infoBannerMessages.period = `ℹ️ بەرواری پێشبینیکراوی سووڕەکەت ${Math.abs(daysLeft)} ڕۆژە تێپەڕیوە. ئەگەر سووڕەکەت دەستی پێکردووە، تکایە تۆماری بکە.`;
         } else {
-            banner.style.display = 'none';
+            infoBannerMessages.period = '';
         }
+        renderInfoBanner();
     }
 
     let userAge = null;
@@ -2515,6 +2773,17 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         renderDailyLogHistory();
     }
 
+    function saveCervixPosition() {
+        const val = document.getElementById('cervixPositionSelect').value;
+        if (!dailyLogs[selectedLogDateKey]) dailyLogs[selectedLogDateKey] = {};
+        dailyLogs[selectedLogDateKey].cervixPosition = val;
+        saveUserData({ glow_daily_logs: dailyLogs });
+        renderDailyLogHistory();
+
+        const note = document.getElementById('cervixPositionNote');
+        if (note) note.style.display = (val === 'high_soft_open') ? 'block' : 'none';
+    }
+
     function saveFlowIntensity() {
         const val = document.getElementById('flowIntensitySelect').value;
         if (!dailyLogs[selectedLogDateKey]) dailyLogs[selectedLogDateKey] = {};
@@ -2534,6 +2803,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const note = document.getElementById('crampsSevereNote');
         if (note) note.style.display = (val === 'severe') ? 'block' : 'none';
         checkPregnancyDangerSigns();
+
+        const pmsVal = parseInt(document.getElementById('pmsRange').value) || 0;
+        checkCombinedPMDDCrampsAdvisory(pmsVal >= 7 && pmsImpact);
     }
 
     function saveDayNote() {
@@ -2588,7 +2860,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         grid.innerHTML = '';
         customSymptomsList.forEach(name => {
             const div = document.createElement('div');
-            div.className = 'symptom-item';
+            div.className = 'symptom-item custom-symptom-item';
+            // Longer names get the same 2-column "wide" treatment already
+            // used for built-in long labels, instead of getting crushed
+            // into a single narrow cell.
+            if (name.length > 12) div.classList.add('wide');
 
             const icon = document.createElement('i');
             icon.className = 'fa-solid fa-tag';
@@ -2634,6 +2910,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         document.getElementById('ovulationTestSelect').value = log.ovulationTest || 'not_tested';
         updateOvulationTestNote(log.ovulationTest || 'not_tested');
         document.getElementById('sexualActivitySelect').value = log.sexualActivity || 'none';
+        document.getElementById('cervixPositionSelect').value = log.cervixPosition || 'not_checked';
+        const cervixNote = document.getElementById('cervixPositionNote');
+        if (cervixNote) cervixNote.style.display = (log.cervixPosition === 'high_soft_open') ? 'block' : 'none';
         const hotFlashInput = document.getElementById('hotFlashCount');
         if (hotFlashInput) hotFlashInput.value = (log.hotFlashCount !== undefined && log.hotFlashCount !== null) ? log.hotFlashCount : '';
         document.getElementById('dayNoteInput').value = log.note || '';
@@ -2650,6 +2929,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             (log.bbt !== undefined && log.bbt !== null) ||
             (log.ovulationTest && log.ovulationTest !== 'not_tested') ||
             (log.sexualActivity && log.sexualActivity !== 'none') ||
+            (log.cervixPosition && log.cervixPosition !== 'not_checked') ||
             (log.hotFlashCount !== undefined && log.hotFlashCount !== null && log.hotFlashCount > 0)
         );
     }
@@ -2916,6 +3196,13 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         }
     }
 
+    function switchHistoryChart() {
+        const val = document.getElementById('chartTypeSelector').value;
+        document.getElementById('cycleLengthChartWrapper').style.display = (val === 'cycle') ? 'block' : 'none';
+        document.getElementById('weightHistoryChartWrapper').style.display = (val === 'weight') ? 'block' : 'none';
+        document.getElementById('bbtChartWrapper').style.display = (val === 'bbt') ? 'block' : 'none';
+    }
+
     function renderCycleLengthChart() {
         const container = document.getElementById('cycleLengthChart');
         const emptyMsg = document.getElementById('cycleLengthChartEmpty');
@@ -3140,6 +3427,105 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             : `پشکنینی داهاتوو: ${dateLabel} (${daysLeft} ڕۆژی ماوە)`;
     }
 
+    let appPIN = null;
+
+    function setAppPIN() {
+        const val = document.getElementById('newPinInput').value.trim();
+        if (!/^\d{4,6}$/.test(val)) {
+            showToast('تکایە کۆدێکی ٤ تا ٦ ژمارە بنووسە.');
+            return;
+        }
+        appPIN = val;
+        saveUserData({ glow_app_pin: appPIN });
+        document.getElementById('newPinInput').value = '';
+        document.getElementById('removePinBtn').style.display = 'block';
+        showToast('کۆدی نهێنی دانرا.');
+    }
+
+    function removeAppPIN() {
+        if (!confirm('دڵنیایت لە لابردنی کۆدی نهێنی؟')) return;
+        appPIN = null;
+        saveUserData({ glow_app_pin: null });
+        document.getElementById('removePinBtn').style.display = 'none';
+        showToast('کۆدی نهێنی لابرا.');
+    }
+
+    // Shown right after login if a PIN is set — protects the data if the
+    // phone is picked up by someone else while already signed in to
+    // Firebase. This is a local gate only, separate from the account
+    // password.
+    function showPinLockIfNeeded() {
+        const overlay = document.getElementById('pinLockOverlay');
+        if (!overlay) return;
+        if (appPIN) {
+            overlay.style.display = 'flex';
+            const input = document.getElementById('pinLockInput');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 100);
+            }
+        } else {
+            overlay.style.display = 'none';
+        }
+    }
+
+    function attemptUnlockPIN() {
+        const input = document.getElementById('pinLockInput');
+        const errorEl = document.getElementById('pinLockError');
+        if (!input) return;
+        if (input.value === appPIN) {
+            document.getElementById('pinLockOverlay').style.display = 'none';
+            if (errorEl) errorEl.style.display = 'none';
+        } else {
+            if (errorEl) errorEl.style.display = 'block';
+            input.value = '';
+        }
+    }
+
+    function exportCSV() {
+        const headers = ['Date', 'Symptoms', 'Discharge', 'Flow', 'Cramps', 'BBT', 'OvulationTest', 'CervixPosition', 'SexualActivity', 'Note'];
+        const rows = [headers.join(',')];
+
+        const csvEscape = (val) => {
+            if (val === undefined || val === null) return '';
+            return `"${String(val).replace(/"/g, '""')}"`;
+        };
+
+        Object.keys(dailyLogs).sort().forEach(dateKey => {
+            const log = dailyLogs[dateKey];
+            rows.push([
+                csvEscape(dateKey),
+                csvEscape((log.symptoms || []).join('; ')),
+                csvEscape(log.discharge || ''),
+                csvEscape(log.flow || ''),
+                csvEscape(log.cramps || ''),
+                csvEscape((log.bbt !== undefined && log.bbt !== null) ? log.bbt : ''),
+                csvEscape(log.ovulationTest || ''),
+                csvEscape(log.cervixPosition || ''),
+                csvEscape(log.sexualActivity || ''),
+                csvEscape(log.note || '')
+            ].join(','));
+        });
+
+        if (rows.length === 1) {
+            showToast('هیچ داتایەکی لۆگی ڕۆژانە نییە بۆ دەرکردن.');
+            return;
+        }
+
+        // A UTF-8 BOM prefix so Excel opens the Kurdish/Arabic text
+        // correctly instead of showing garbled characters.
+        const csvContent = '\uFEFF' + rows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Glow-DailyLog-${formatDateKey(new Date())}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
     function saveWeightGoal() {
         const val = parseFloat(document.getElementById('weightGoalInput').value);
 
@@ -3238,9 +3624,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // doesn't have). Flags anything due within the next hour, or up to
     // 30 minutes overdue.
     function checkMedicationNotices() {
-        const banner = document.getElementById('medReminderBanner');
-        if (!banner) return;
-
         const now = new Date();
         const notices = [];
 
@@ -3268,32 +3651,21 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             }
         }
 
-        if (notices.length === 0) {
-            banner.style.display = 'none';
-            banner.innerHTML = '';
-            return;
-        }
-        banner.style.display = 'block';
-        banner.innerHTML = `💊 ئاگاداری خواردنی دەرمان: ${notices.join('، ')}`;
+        infoBannerMessages.medication = notices.length ? `💊 ئاگاداری خواردنی دەرمان: ${notices.join('، ')}` : '';
+        renderInfoBanner();
     }
 
     // A gentle nudge if today has nothing logged yet — never on the very
     // first login (there's nothing to nudge about yet) and never pushy,
     // just a quiet line at the bottom of the alert stack.
     function checkLogNudge() {
-        const banner = document.getElementById('logNudgeBanner');
-        if (!banner) return;
-
         const todayKey = formatDateKey(new Date());
         const alreadyLogged = hasLoggedData(dailyLogs[todayKey]);
 
-        if (!alreadyLogged && Object.keys(dailyLogs).length > 0) {
-            banner.style.display = 'block';
-            banner.innerHTML = '📝 ئەمڕۆ هێشتا هیچ نیشانەیەکت تۆمار نەکردووە.';
-        } else {
-            banner.style.display = 'none';
-            banner.innerHTML = '';
-        }
+        infoBannerMessages.nudge = (!alreadyLogged && Object.keys(dailyLogs).length > 0)
+            ? '📝 ئەمڕۆ هێشتا هیچ نیشانەیەکت تۆمار نەکردووە.'
+            : '';
+        renderInfoBanner();
     }
 
     function deleteMedication(idx) {
@@ -3349,6 +3721,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const bcActive = birthControl && birthControl.type && birthControl.type !== 'none';
         if (pregnancyMode && pregnancyMode.enabled && bcActive) {
             showToast('⚠️ تێبینی: دۆخی دووگیانی و بەرگری لە سکپڕبوون هەردووکیان چالاکن لە هەمان کاتدا. تکایە دڵنیابەرەوە ئەمە ڕاستە.');
+        }
+        if (pregnancyMode && pregnancyMode.enabled && perimenopauseMode) {
+            showToast('⚠️ تێبینی: دۆخی دووگیانی و دۆخی گواستنەوەی تەمەن هەردووکیان چالاکن لە هەمان کاتدا — ئەمانە بایۆلۆژیکی پێکەوە نایێن. تکایە دڵنیابەرەوە ئەمە ڕاستە.');
         }
     }
 
@@ -3594,6 +3969,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         perimenopauseMode = document.getElementById('perimenopauseModeToggle').checked;
         saveUserData({ glow_perimenopause_mode: perimenopauseMode });
         document.getElementById('perimenopauseFields').style.display = perimenopauseMode ? 'block' : 'none';
+        checkPregnancyBCConflict();
     }
 
     function saveHotFlashCount() {
@@ -3634,7 +4010,20 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const note = document.getElementById('pmdNote');
         if (!note) return;
         const pmsVal = parseInt(document.getElementById('pmsRange').value) || 0;
-        note.style.display = (pmsVal >= 7 && pmsImpact) ? 'block' : 'none';
+        const pmddLikely = pmsVal >= 7 && pmsImpact;
+        note.style.display = pmddLikely ? 'block' : 'none';
+        checkCombinedPMDDCrampsAdvisory(pmddLikely);
+    }
+
+    // Links the two notes above when they co-occur, instead of leaving
+    // them as two disconnected warnings that happen to both be visible.
+    function checkCombinedPMDDCrampsAdvisory(pmddLikely) {
+        const combinedNote = document.getElementById('combinedAdvisoryNote');
+        if (!combinedNote) return;
+        const todayKey = formatDateKey(new Date());
+        const todayLog = dailyLogs[todayKey];
+        const severeCrampsToday = todayLog && todayLog.cramps === 'severe';
+        combinedNote.style.display = (pmddLikely && severeCrampsToday) ? 'block' : 'none';
     }
 
     function saveSleepData() {
